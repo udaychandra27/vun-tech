@@ -28,19 +28,19 @@ export function SiteHeader() {
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
-          <Link to="/" className="flex items-center gap-4">
+          <Link to="/" className="flex min-w-0 items-center gap-3 sm:gap-4">
             <img
               src="/vun-logo.png"
               alt="VUN Tech logo"
-              className="h-20 w-20 rounded-md object-cover"
+              className="h-12 w-12 shrink-0 rounded-md object-cover sm:h-14 sm:w-14 md:h-16 md:w-16"
               loading="lazy"
               decoding="async"
             />
             <div className="leading-tight">
-              <div className="text-2xl font-semibold tracking-[0.2em] text-ink" style={{ fontFamily: "Fraunces, serif" }}>
+              <div className="text-lg font-semibold tracking-[0.2em] text-ink sm:text-2xl" style={{ fontFamily: "Fraunces, serif" }}>
                 VUN Tech
               </div>
-              <div className="text-[10px] font-semibold tracking-[0.35em] text-slate">
+              <div className="hidden text-[10px] font-semibold tracking-[0.35em] text-slate sm:block">
                 INNOVATE. SECURE. ADVANCE.
               </div>
             </div>
@@ -65,7 +65,7 @@ export function SiteHeader() {
           <Button asChild size="sm" className="hidden sm:inline-flex">
             <Link to="/contact">Get Quote</Link>
           </Button>
-          <Button asChild size="sm" variant="outline" className="md:hidden">
+          <Button asChild size="sm" variant="outline" className="sm:hidden">
             <Link to="/contact">Contact</Link>
           </Button>
         </div>

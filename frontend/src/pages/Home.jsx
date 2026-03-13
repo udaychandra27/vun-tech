@@ -209,7 +209,7 @@ export function Home() {
 
       <section className="border-b border-fog bg-white section-sheen bg-grid">
         <Container className="py-14">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-3xl font-semibold">Services</h2>
               <p className="text-slate">Focused, practical offerings.</p>
@@ -226,9 +226,9 @@ export function Home() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm text-slate">
                   <p>{service.description}</p>
-                  <ul className="space-y-2 text-ink">
+                  <ul className="space-y-2 text-ink list-disc pl-4">
                     {(service.includes || []).map((item) => (
-                      <li key={item}>• {item}</li>
+                      <li key={item}>{item}</li>
                     ))}
                   </ul>
                   <p className="text-xs uppercase tracking-wide text-ink/60">

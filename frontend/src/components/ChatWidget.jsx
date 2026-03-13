@@ -9,7 +9,7 @@ const defaultFaq = [
   },
   {
     q: "How do we start?",
-    a: "Share your goal and timeline on the Contact page. We respond with next steps in 1–2 business days.",
+    a: "Share your goal and timeline on the Contact page. We respond with next steps in 1-2 business days.",
   },
   {
     q: "Do you work with students?",
@@ -98,9 +98,9 @@ export function ChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
       {open ? (
-        <div className="w-80 rounded-2xl border border-fog bg-white shadow-xl">
+        <div className="w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-fog bg-white shadow-xl sm:w-80">
           <div className="flex items-center justify-between border-b border-fog p-3">
             <div className="text-sm font-semibold">Quick Help</div>
             <button
@@ -116,7 +116,7 @@ export function ChatWidget() {
             {messages.map((msg, idx) => (
               <div
                 key={`${msg.role}-${idx}`}
-                className={`rounded-lg px-3 py-2 ${
+                className={`break-words rounded-lg px-3 py-2 ${
                   msg.role === "bot"
                     ? "bg-fog text-ink"
                     : "bg-moss text-white ml-auto"
