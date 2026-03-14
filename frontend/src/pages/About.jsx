@@ -55,6 +55,7 @@ export function About() {
   const resolveImageUrl = (url) => {
     if (!url) return ""
     if (url.startsWith("http") || url.startsWith("data:")) return url
+    if (url.startsWith("uploads/")) return `${API_URL}/${url}`
     if (url.startsWith("/uploads/")) return `${API_URL}${url}`
     return url
   }
@@ -81,6 +82,13 @@ export function About() {
     }
   }, [])
 
+  useEffect(() => {
+    content.galleryImages.forEach((url) => {
+      const image = new Image()
+      image.src = resolveImageUrl(url)
+    })
+  }, [content.galleryImages])
+
   return (
     <div className="bg-sand">
       <section className="relative border-b border-fog bg-sand bg-grid">
@@ -102,8 +110,9 @@ export function About() {
                 key={`about-gallery-${index}`}
                 src={resolveImageUrl(imageUrl)}
                 alt="About gallery"
-                loading="lazy"
-                decoding="async"
+                loading="eager"
+                fetchPriority="high"
+                decoding="sync"
                 className="h-48 w-full rounded-2xl border border-fog object-cover"
               />
             ))}
@@ -130,24 +139,25 @@ export function About() {
                 <Card key={member.name} className="team-card glass-card">
                   <CardHeader className="items-center pt-8 text-center">
                     <div className="team-avatar">
+                      <span className="team-initials">
+                        {member.name
+                          .split(" ")
+                          .map((part) => part[0])
+                          .join("")}
+                      </span>
                       {member.imageUrl ? (
                         <img
-                          src={
-                            member.imageUrl.startsWith("http")
-                              ? member.imageUrl
-                              : `${API_URL}${member.imageUrl}`
-                          }
+                          src={resolveImageUrl(member.imageUrl)}
                           alt={member.name}
                           loading="lazy"
                           decoding="async"
-                          className="h-full w-full rounded-full object-cover"
+                          className="team-avatar-image"
+                          onLoad={(e) => {
+                            const initials = e.currentTarget.previousSibling
+                            if (initials) initials.style.opacity = "0"
+                          }}
                         />
-                      ) : (
-                        member.name
-                          .split(" ")
-                          .map((part) => part[0])
-                          .join("")
-                      )}
+                      ) : null}
                     </div>
                     <CardTitle className="mt-5 text-xl font-semibold text-[#3b1d79]">
                       {member.name}
