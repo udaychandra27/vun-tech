@@ -41,23 +41,33 @@ const defaultTeam = [
 ]
 
 export function About() {
+  const storedGallery =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("aboutGalleryImages") || "null")
+      : null
   const [content, setContent] = useState({
     heroTitle: "Small team, serious delivery",
     heroSubtitle:
       "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
     approach: defaultApproach,
     team: defaultTeam,
-    galleryImages: ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"],
+    galleryImages:
+      Array.isArray(storedGallery) && storedGallery.length === 3
+        ? storedGallery
+        : ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"],
     closingNote:
       "We work best with teams who value clear communication, respect time, and want solutions that last. If that sounds like you, we should talk.",
   })
 
   const resolveImageUrl = (url) => {
     if (!url) return ""
-    if (url.startsWith("http") || url.startsWith("data:")) return url
-    if (url.startsWith("uploads/")) return `${API_URL}/${url}`
-    if (url.startsWith("/uploads/")) return `${API_URL}${url}`
-    return url
+    const normalized = url.replace(/\\/g, "/")
+    if (normalized.startsWith("http") || normalized.startsWith("data:")) {
+      return normalized
+    }
+    if (normalized.startsWith("uploads/")) return `${API_URL}/${normalized}`
+    if (normalized.startsWith("/uploads/")) return `${API_URL}${normalized}`
+    return normalized
   }
 
   useEffect(() => {
@@ -75,6 +85,12 @@ export function About() {
             : prev.galleryImages,
           closingNote: data.closingNote || prev.closingNote,
         }))
+        if (data.galleryImages?.length === 3) {
+          localStorage.setItem(
+            "aboutGalleryImages",
+            JSON.stringify(data.galleryImages)
+          )
+        }
       })
       .catch(() => {})
     return () => {

@@ -68,7 +68,16 @@ app.use("/api/admin/login", loginLimiter)
 
 app.use("/api", publicRoutes)
 app.use("/api", adminRoutes)
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")))
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"), {
+    maxAge: "7d",
+    setHeaders: (res) => {
+      res.setHeader("Access-Control-Allow-Origin", "*")
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
+    },
+  })
+)
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" })
