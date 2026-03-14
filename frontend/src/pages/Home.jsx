@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Container } from "@/components/layout/Container"
 import { featuredServices, defaultProjects, values } from "@/data/content"
 import { apiFetch, API_URL } from "@/lib/api"
+import { OptimizedImage } from "@/components/OptimizedImage"
 import {
   GradientOrbs,
   SectionBadge,
@@ -66,6 +67,21 @@ export function Home() {
     if (url.startsWith("/uploads/")) return `${API_URL}${url}`
     return url
   }
+
+  useEffect(() => {
+    const heroUrl = homeContent.heroCards?.[0]?.imageUrl
+    if (!heroUrl) return
+    const resolved = resolveImageUrl(heroUrl)
+    const link = document.createElement("link")
+    link.rel = "preload"
+    link.as = "image"
+    link.href = resolved
+    link.setAttribute("fetchpriority", "high")
+    document.head.appendChild(link)
+    return () => {
+      document.head.removeChild(link)
+    }
+  }, [homeContent.heroCards])
 
   const openOffer = (offer) => {
     setActiveOffer(offer)
@@ -214,9 +230,10 @@ export function Home() {
                 >
                   <div className="overflow-hidden rounded-xl bg-sand">
                     {card.imageUrl ? (
-                      <img
+                      <OptimizedImage
                         src={resolveImageUrl(card.imageUrl)}
                         alt={`Hero ${index + 1}`}
+                        priority={index === 0}
                         className="h-40 w-full object-cover"
                       />
                     ) : (

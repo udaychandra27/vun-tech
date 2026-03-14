@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { apiFetch } from "@/lib/api"
+import { OptimizedImage } from "@/components/OptimizedImage"
 
 export function Trending() {
   const [open, setOpen] = useState(false)
@@ -137,11 +138,9 @@ export function Trending() {
                 <CardContent className="space-y-3 text-sm text-slate">
                   <div className="overflow-hidden rounded-xl border border-fog bg-white">
                     {product.imageUrl ? (
-                      <img
+                      <OptimizedImage
                         src={product.imageUrl}
                         alt={product.title}
-                        loading="lazy"
-                        decoding="async"
                         className="h-36 w-full object-cover"
                       />
                     ) : (
@@ -181,11 +180,9 @@ export function Trending() {
             <div className="space-y-4 text-sm text-slate">
               <div className="overflow-hidden rounded-xl border border-fog bg-white">
                 {active.imageUrl ? (
-                  <img
+                  <OptimizedImage
                     src={active.imageUrl}
                     alt={active.title}
-                    loading="lazy"
-                    decoding="async"
                     className="h-44 w-full object-cover"
                   />
                 ) : (

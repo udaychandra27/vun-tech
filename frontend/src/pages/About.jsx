@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionBadge, GradientOrbs } from "@/components/Decorations"
 import { apiFetch, API_URL } from "@/lib/api"
 import { Linkedin } from "lucide-react"
+import { OptimizedImage } from "@/components/OptimizedImage"
 
 const defaultApproach = [
   {
@@ -170,11 +171,9 @@ export function About() {
                           .join("")}
                       </span>
                       {member.imageUrl ? (
-                        <img
+                        <OptimizedImage
                           src={resolveImageUrl(member.imageUrl)}
                           alt={member.name}
-                          loading="lazy"
-                          decoding="async"
                           className="team-avatar-image"
                           onLoad={(e) => {
                             const initials = e.currentTarget.previousSibling

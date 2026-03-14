@@ -3,6 +3,7 @@ import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Container } from "@/components/layout/Container"
+import { OptimizedImage } from "@/components/OptimizedImage"
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -29,12 +30,10 @@ export function SiteHeader() {
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
           <Link to="/" className="flex min-w-0 items-center gap-3 sm:gap-4">
-            <img
+            <OptimizedImage
               src="/vun-logo.png"
               alt="VUN Tech logo"
               className="h-12 w-12 shrink-0 rounded-md object-cover sm:h-14 sm:w-14 md:h-16 md:w-16"
-              loading="lazy"
-              decoding="async"
             />
             <div className="leading-tight">
               <div className="text-lg font-semibold tracking-[0.2em] text-ink sm:text-2xl" style={{ fontFamily: "Fraunces, serif" }}>

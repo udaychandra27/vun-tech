@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { apiFetch, setAuthToken, API_URL } from "@/lib/api"
+import { OptimizedImage } from "@/components/OptimizedImage"
 import Cropper from "react-easy-crop"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
@@ -1746,7 +1747,7 @@ export function AdminDashboard() {
                             >
                               <div className="mb-3 aspect-[16/9] w-full overflow-hidden rounded-lg bg-sand">
                                 {card.imageUrl ? (
-                                  <img
+                                  <OptimizedImage
                                     src={resolveImageUrl(card.imageUrl)}
                                     alt={`Hero ${index + 1}`}
                                     className="h-full w-full object-cover"
