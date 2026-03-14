@@ -365,12 +365,25 @@ export function AdminDashboard() {
       image.src = url
     })
 
-  const getCroppedBlob = async (imageSrc, pixelCrop) => {
+  const getCroppedBlob = async (imageSrc, pixelCrop, maxWidth, maxHeight) => {
     const image = await createImage(imageSrc)
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
-    canvas.width = pixelCrop.width
-    canvas.height = pixelCrop.height
+    let targetWidth = pixelCrop.width
+    let targetHeight = pixelCrop.height
+    if (maxWidth || maxHeight) {
+      const widthLimit = maxWidth || pixelCrop.width
+      const heightLimit = maxHeight || pixelCrop.height
+      const ratio = Math.min(
+        widthLimit / pixelCrop.width,
+        heightLimit / pixelCrop.height,
+        1
+      )
+      targetWidth = Math.round(pixelCrop.width * ratio)
+      targetHeight = Math.round(pixelCrop.height * ratio)
+    }
+    canvas.width = targetWidth
+    canvas.height = targetHeight
     ctx.drawImage(
       image,
       pixelCrop.x,
@@ -379,11 +392,11 @@ export function AdminDashboard() {
       pixelCrop.height,
       0,
       0,
-      pixelCrop.width,
-      pixelCrop.height
+      targetWidth,
+      targetHeight
     )
     return new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.92)
+      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9)
     })
   }
 
@@ -404,7 +417,16 @@ export function AdminDashboard() {
   const handleCropSave = async () => {
     if (!cropImageSrc || !croppedPixels || !cropTarget) return
     try {
-      const blob = await getCroppedBlob(cropImageSrc, croppedPixels)
+      const maxSize =
+        cropTarget.section === "about"
+          ? { w: 1400, h: 1050 }
+          : { w: 1600, h: 900 }
+      const blob = await getCroppedBlob(
+        cropImageSrc,
+        croppedPixels,
+        maxSize.w,
+        maxSize.h
+      )
       if (!blob) return
       const formData = new FormData()
       formData.append("image", new File([blob], "crop.jpg", { type: blob.type }))

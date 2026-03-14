@@ -58,6 +58,7 @@ export function About() {
     closingNote:
       "We work best with teams who value clear communication, respect time, and want solutions that last. If that sounds like you, we should talk.",
   })
+  const fallbackGallery = ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"]
 
   const resolveImageUrl = (url) => {
     if (!url) return ""
@@ -130,6 +131,9 @@ export function About() {
                 fetchPriority="high"
                 decoding="sync"
                 className="h-48 w-full rounded-2xl border border-fog object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = fallbackGallery[index] || "/images/about-1.svg"
+                }}
               />
             ))}
           </div>
@@ -171,6 +175,11 @@ export function About() {
                           onLoad={(e) => {
                             const initials = e.currentTarget.previousSibling
                             if (initials) initials.style.opacity = "0"
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none"
+                            const initials = e.currentTarget.previousSibling
+                            if (initials) initials.style.opacity = "1"
                           }}
                         />
                       ) : null}
