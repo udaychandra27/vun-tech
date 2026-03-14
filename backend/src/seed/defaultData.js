@@ -274,6 +274,14 @@ export const defaultSiteContent = {
     heroSubtitle:
       "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
     galleryImages: ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"],
+    highlightTitle: "Built for teams that value clarity",
+    highlightSubtitle:
+      "We partner with founders and ops leaders who want dependable delivery, transparent communication, and systems that scale without drama.",
+    highlightPoints: [
+      "Senior-led delivery with weekly checkpoints",
+      "Clear scope, timelines, and measurable outcomes",
+      "Practical engineering that lasts beyond launch",
+    ],
     approach: [
       {
         title: "Discovery",

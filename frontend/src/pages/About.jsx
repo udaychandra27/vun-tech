@@ -42,10 +42,6 @@ const defaultTeam = [
 ]
 
 export function About() {
-  const storedGallery =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("aboutGalleryImages") || "null")
-      : null
   const storedTeam =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("aboutTeamMembers") || "null")
@@ -57,14 +53,17 @@ export function About() {
     approach: defaultApproach,
     team:
       Array.isArray(storedTeam) && storedTeam.length > 0 ? storedTeam : defaultTeam,
-    galleryImages:
-      Array.isArray(storedGallery) && storedGallery.length === 3
-        ? storedGallery
-        : ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"],
+    highlightTitle: "Built for teams that value clarity",
+    highlightSubtitle:
+      "We partner with founders and ops leaders who want dependable delivery, transparent communication, and systems that scale without drama.",
+    highlightPoints: [
+      "Senior-led delivery with weekly checkpoints",
+      "Clear scope, timelines, and measurable outcomes",
+      "Practical engineering that lasts beyond launch",
+    ],
     closingNote:
       "We work best with teams who value clear communication, respect time, and want solutions that last. If that sounds like you, we should talk.",
   })
-  const fallbackGallery = ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"]
 
   const resolveImageUrl = (url) => {
     if (!url) return ""
@@ -87,17 +86,13 @@ export function About() {
           ...data,
           approach: data.approach?.length ? data.approach : prev.approach,
           team: data.team?.length ? data.team : prev.team,
-          galleryImages: data.galleryImages?.length
-            ? data.galleryImages
-            : prev.galleryImages,
+          highlightTitle: data.highlightTitle || prev.highlightTitle,
+          highlightSubtitle: data.highlightSubtitle || prev.highlightSubtitle,
+          highlightPoints: data.highlightPoints?.length
+            ? data.highlightPoints
+            : prev.highlightPoints,
           closingNote: data.closingNote || prev.closingNote,
         }))
-        if (data.galleryImages?.length === 3) {
-          localStorage.setItem(
-            "aboutGalleryImages",
-            JSON.stringify(data.galleryImages)
-          )
-        }
         if (Array.isArray(data.team) && data.team.length > 0) {
           localStorage.setItem("aboutTeamMembers", JSON.stringify(data.team))
         }
@@ -107,13 +102,6 @@ export function About() {
       mounted = false
     }
   }, [])
-
-  useEffect(() => {
-    content.galleryImages.forEach((url) => {
-      const image = new Image()
-      image.src = resolveImageUrl(url)
-    })
-  }, [content.galleryImages])
 
   return (
     <div className="bg-sand">
@@ -130,21 +118,28 @@ export function About() {
 
       <section>
         <Container className="py-12">
-          <div className="mb-10 grid gap-6 md:grid-cols-3">
-            {content.galleryImages.map((imageUrl, index) => (
-              <img
-                key={`about-gallery-${index}`}
-                src={resolveImageUrl(imageUrl)}
-                alt="About gallery"
-                loading="eager"
-                fetchPriority="high"
-                decoding="sync"
-                className="h-48 w-full rounded-2xl border border-fog object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = fallbackGallery[index] || "/images/about-1.svg"
-                }}
-              />
-            ))}
+          <div className="mb-10 rounded-3xl border border-fog bg-white/70 p-8 shadow-sm">
+            <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink/60">
+                  Why teams choose us
+                </div>
+                <h2 className="mt-3 text-3xl font-semibold text-ink">
+                  {content.highlightTitle}
+                </h2>
+                <p className="mt-3 text-slate">{content.highlightSubtitle}</p>
+              </div>
+              <div className="grid gap-3">
+                {content.highlightPoints.map((point) => (
+                  <div
+                    key={point}
+                    className="rounded-2xl border border-fog bg-sand px-4 py-3 text-sm text-ink"
+                  >
+                    {point}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {content.approach.map((step) => (

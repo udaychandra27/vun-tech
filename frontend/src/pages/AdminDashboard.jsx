@@ -62,6 +62,9 @@ export function AdminDashboard() {
     approachText: "",
     closingNote: "",
     galleryImages: [],
+    highlightTitle: "",
+    highlightSubtitle: "",
+    highlightPointsText: "",
   })
 
   const [contactForm, setContactForm] = useState({
@@ -154,6 +157,9 @@ export function AdminDashboard() {
             .join("\n"),
           closingNote: contentData.about.closingNote || "",
           galleryImages: contentData.about.galleryImages || [],
+          highlightTitle: contentData.about.highlightTitle || "",
+          highlightSubtitle: contentData.about.highlightSubtitle || "",
+          highlightPointsText: (contentData.about.highlightPoints || []).join("\n"),
         })
         setTeamMembers(contentData.about.team || [])
       }
@@ -473,6 +479,9 @@ export function AdminDashboard() {
       approach: parseApproach(aboutForm.approachText),
       closingNote: aboutForm.closingNote,
       galleryImages: aboutForm.galleryImages || [],
+      highlightTitle: aboutForm.highlightTitle,
+      highlightSubtitle: aboutForm.highlightSubtitle,
+      highlightPoints: parseList(aboutForm.highlightPointsText || ""),
       team: nextTeamMembers,
     }
     try {
@@ -489,6 +498,9 @@ export function AdminDashboard() {
             .join("\n"),
           closingNote: updated.about.closingNote || "",
           galleryImages: updated.about.galleryImages || [],
+          highlightTitle: updated.about.highlightTitle || "",
+          highlightSubtitle: updated.about.highlightSubtitle || "",
+          highlightPointsText: (updated.about.highlightPoints || []).join("\n"),
         })
         setTeamMembers(updated.about.team || [])
       }
@@ -1469,46 +1481,36 @@ export function AdminDashboard() {
                           }))
                         }
                       />
-                      <div className="grid gap-3">
-                        <div className="text-sm font-medium text-ink">
-                          About images (3)
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                          {[0, 1, 2].map((index) => {
-                            const imageUrl = aboutForm.galleryImages?.[index] || ""
-                            return (
-                              <div
-                                key={`about-image-${index}`}
-                                className="rounded-xl border border-fog bg-white p-3 text-xs text-slate"
-                              >
-                                <div className="mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg bg-sand">
-                                  {imageUrl ? (
-                                    <img
-                                      src={resolveImageUrl(imageUrl)}
-                                      alt={`About ${index + 1}`}
-                                      className="h-full w-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="flex h-full items-center justify-center text-ink/40">
-                                      No image
-                                    </div>
-                                  )}
-                                </div>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (file) {
-                                      openCropper(file, { section: "about", index }, 4 / 3)
-                                    }
-                                  }}
-                                />
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
+                      <Input
+                        placeholder="Highlight section title"
+                        value={aboutForm.highlightTitle}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            highlightTitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Highlight section subtitle"
+                        value={aboutForm.highlightSubtitle}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            highlightSubtitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Highlight points (one per line)"
+                        value={aboutForm.highlightPointsText}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            highlightPointsText: e.target.value,
+                          }))
+                        }
+                      />
                       <Button type="submit">Save about content</Button>
                     </form>
                   </CardContent>

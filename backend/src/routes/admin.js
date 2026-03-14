@@ -94,6 +94,9 @@ const aboutContentSchema = z.object({
   heroTitle: z.string().min(2).max(140),
   heroSubtitle: z.string().min(10).max(600),
   galleryImages: z.array(z.string().max(500)).optional().default([]),
+  highlightTitle: z.string().max(140).optional().or(z.literal("")),
+  highlightSubtitle: z.string().max(400).optional().or(z.literal("")),
+  highlightPoints: z.array(z.string().max(160)).optional().default([]),
   approach: z
     .array(
       z.object({
