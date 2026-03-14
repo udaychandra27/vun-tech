@@ -14,6 +14,7 @@ const teamMemberSchema = new mongoose.Schema(
     role: { type: String, required: true },
     bio: { type: String, default: "" },
     imageUrl: { type: String, default: "" },
+    linkedinUrl: { type: String, default: "" },
   },
   { _id: true }
 )

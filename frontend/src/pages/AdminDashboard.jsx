@@ -87,6 +87,7 @@ export function AdminDashboard() {
     name: "",
     role: "",
     imageUrl: "",
+    linkedinUrl: "",
   })
 
   const [cropOpen, setCropOpen] = useState(false)
@@ -555,6 +556,7 @@ export function AdminDashboard() {
       name: teamForm.name.trim(),
       role: teamForm.role.trim(),
       imageUrl: teamForm.imageUrl.trim(),
+      linkedinUrl: teamForm.linkedinUrl.trim(),
     }
     const tempId =
       typeof crypto !== "undefined" && crypto.randomUUID
@@ -568,7 +570,7 @@ export function AdminDashboard() {
         : [{ _id: tempId, ...payload }, ...teamMembers]
 
     await saveAboutContent(nextTeam)
-    setTeamForm({ id: null, name: "", role: "", imageUrl: "" })
+    setTeamForm({ id: null, name: "", role: "", imageUrl: "", linkedinUrl: "" })
   }
 
   const handleTeamDelete = async (id) => {
@@ -1548,6 +1550,16 @@ export function AdminDashboard() {
                           }))
                         }
                       />
+                      <Input
+                        placeholder="LinkedIn profile URL (optional)"
+                        value={teamForm.linkedinUrl}
+                        onChange={(e) =>
+                          setTeamForm((prev) => ({
+                            ...prev,
+                            linkedinUrl: e.target.value,
+                          }))
+                        }
+                      />
                       <div className="grid gap-2">
                         <label className="text-sm text-slate">
                           Upload team image (JPG/PNG/WEBP, max 2MB)
@@ -1599,6 +1611,7 @@ export function AdminDashboard() {
                                     name: member.name,
                                     role: member.role,
                                     imageUrl: member.imageUrl || "",
+                                    linkedinUrl: member.linkedinUrl || "",
                                   })
                                 }
                               >

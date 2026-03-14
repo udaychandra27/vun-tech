@@ -110,6 +110,7 @@ const aboutContentSchema = z.object({
         role: z.string().min(2).max(120),
         bio: z.string().max(400).optional().or(z.literal("")),
         imageUrl: z.string().max(500).optional().or(z.literal("")),
+        linkedinUrl: z.string().max(500).optional().or(z.literal("")),
       })
     )
     .optional()

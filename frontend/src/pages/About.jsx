@@ -3,6 +3,7 @@ import { Container } from "@/components/layout/Container"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionBadge, GradientOrbs } from "@/components/Decorations"
 import { apiFetch, API_URL } from "@/lib/api"
+import { Linkedin } from "lucide-react"
 
 const defaultApproach = [
   {
@@ -197,9 +198,18 @@ export function About() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0 pb-8 text-center text-sm text-slate">
-                    <div className="font-medium text-slate-500">
-                      {member.role}
-                    </div>
+                    <div className="font-medium text-slate-500">{member.role}</div>
+                    {member.linkedinUrl && (
+                      <a
+                        className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#0a66c2]"
+                        href={member.linkedinUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                        LinkedIn
+                      </a>
+                    )}
                   </CardContent>
                 </Card>
               ))}
