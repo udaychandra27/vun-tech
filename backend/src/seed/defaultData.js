@@ -273,6 +273,7 @@ export const defaultSiteContent = {
     heroTitle: "Small team, serious delivery",
     heroSubtitle:
       "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
+    galleryImages: ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"],
     approach: [
       {
         title: "Discovery",
@@ -326,5 +327,8 @@ export const defaultSiteContent = {
       "Expected deadline or milestone.",
       "Current links, docs, or references.",
     ],
+  },
+  home: {
+    heroCards: [],
   },
 }

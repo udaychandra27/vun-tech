@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Container } from "@/components/layout/Container"
 import { featuredServices, defaultProjects, values } from "@/data/content"
-import { apiFetch } from "@/lib/api"
+import { apiFetch, API_URL } from "@/lib/api"
 import {
   GradientOrbs,
   SectionBadge,
@@ -18,6 +18,9 @@ import { Input } from "@/components/ui/input"
 export function Home() {
   const [services, setServices] = useState(featuredServices)
   const [projects, setProjects] = useState(defaultProjects)
+  const [homeContent, setHomeContent] = useState({
+    heroCards: [],
+  })
   const [offerOpen, setOfferOpen] = useState(false)
   const [activeOffer, setActiveOffer] = useState(null)
   const [offerForm, setOfferForm] = useState({ name: "", email: "", phone: "" })
@@ -43,7 +46,21 @@ export function Home() {
         if (Array.isArray(data) && data.length > 0) setProjects(data)
       })
       .catch(() => {})
+    apiFetch("/api/content/home")
+      .then((data) => {
+        if (data?.heroCards?.length) {
+          setHomeContent({ heroCards: data.heroCards })
+        }
+      })
+      .catch(() => {})
   }, [])
+
+  const resolveImageUrl = (url) => {
+    if (!url) return ""
+    if (url.startsWith("http") || url.startsWith("data:")) return url
+    if (url.startsWith("/uploads/")) return `${API_URL}${url}`
+    return url
+  }
 
   const openOffer = (offer) => {
     setActiveOffer(offer)
@@ -184,8 +201,34 @@ export function Home() {
             </div>
           </div>
           <div className="space-y-4">
-            <HeroGraphic />
-            <StatGraphic />
+            {homeContent.heroCards?.length >= 2 ? (
+              homeContent.heroCards.slice(0, 2).map((card, index) => (
+                <div
+                  key={`hero-card-${index}`}
+                  className="rounded-2xl border border-fog bg-white p-4"
+                >
+                  <div className="overflow-hidden rounded-xl bg-sand">
+                    {card.imageUrl ? (
+                      <img
+                        src={resolveImageUrl(card.imageUrl)}
+                        alt={`Hero ${index + 1}`}
+                        className="h-40 w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-40 w-full" />
+                    )}
+                  </div>
+                  {card.caption && (
+                    <div className="mt-2 text-xs text-slate">{card.caption}</div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <>
+                <HeroGraphic />
+                <StatGraphic />
+              </>
+            )}
             <div className="glass-card rounded-2xl p-6 shadow-sm">
               <div className="space-y-4 text-sm text-slate">
                 <div className="text-xs uppercase tracking-[0.2em] text-ink/60">

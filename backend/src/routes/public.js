@@ -229,4 +229,13 @@ router.get("/content/contact", async (req, res, next) => {
   }
 })
 
+router.get("/content/home", async (req, res, next) => {
+  try {
+    const content = await SiteContent.findOne({ key: "default" })
+    res.json(content?.home || null)
+  } catch (error) {
+    next(error)
+  }
+})
+
 export default router

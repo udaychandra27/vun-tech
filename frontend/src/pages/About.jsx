@@ -47,9 +47,17 @@ export function About() {
       "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
     approach: defaultApproach,
     team: defaultTeam,
+    galleryImages: ["/images/about-1.svg", "/images/about-2.svg", "/images/about-3.svg"],
     closingNote:
       "We work best with teams who value clear communication, respect time, and want solutions that last. If that sounds like you, we should talk.",
   })
+
+  const resolveImageUrl = (url) => {
+    if (!url) return ""
+    if (url.startsWith("http") || url.startsWith("data:")) return url
+    if (url.startsWith("/uploads/")) return `${API_URL}${url}`
+    return url
+  }
 
   useEffect(() => {
     let mounted = true
@@ -61,6 +69,9 @@ export function About() {
           ...data,
           approach: data.approach?.length ? data.approach : prev.approach,
           team: data.team?.length ? data.team : prev.team,
+          galleryImages: data.galleryImages?.length
+            ? data.galleryImages
+            : prev.galleryImages,
           closingNote: data.closingNote || prev.closingNote,
         }))
       })
@@ -86,27 +97,16 @@ export function About() {
       <section>
         <Container className="py-12">
           <div className="mb-10 grid gap-6 md:grid-cols-3">
-            <img
-              src="/images/about-1.svg"
-              alt="Team collaboration"
-              loading="lazy"
-              decoding="async"
-              className="h-48 w-full rounded-2xl border border-fog object-cover"
-            />
-            <img
-              src="/images/about-2.svg"
-              alt="Product planning"
-              loading="lazy"
-              decoding="async"
-              className="h-48 w-full rounded-2xl border border-fog object-cover"
-            />
-            <img
-              src="/images/about-3.svg"
-              alt="Engineering delivery"
-              loading="lazy"
-              decoding="async"
-              className="h-48 w-full rounded-2xl border border-fog object-cover"
-            />
+            {content.galleryImages.map((imageUrl, index) => (
+              <img
+                key={`about-gallery-${index}`}
+                src={resolveImageUrl(imageUrl)}
+                alt="About gallery"
+                loading="lazy"
+                decoding="async"
+                className="h-48 w-full rounded-2xl border border-fog object-cover"
+              />
+            ))}
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {content.approach.map((step) => (

@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { apiFetch, setAuthToken } from "@/lib/api"
+import { apiFetch, setAuthToken, API_URL } from "@/lib/api"
+import Cropper from "react-easy-crop"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const tabs = [
   "contacts",
@@ -59,6 +61,7 @@ export function AdminDashboard() {
     heroSubtitle: "",
     approachText: "",
     closingNote: "",
+    galleryImages: [],
   })
 
   const [contactForm, setContactForm] = useState({
@@ -71,6 +74,13 @@ export function AdminDashboard() {
     requirementsText: "",
   })
 
+  const [homeForm, setHomeForm] = useState({
+    heroCards: [
+      { imageUrl: "", caption: "" },
+      { imageUrl: "", caption: "" },
+    ],
+  })
+
   const [teamMembers, setTeamMembers] = useState([])
   const [teamForm, setTeamForm] = useState({
     id: null,
@@ -78,6 +88,14 @@ export function AdminDashboard() {
     role: "",
     imageUrl: "",
   })
+
+  const [cropOpen, setCropOpen] = useState(false)
+  const [cropImageSrc, setCropImageSrc] = useState("")
+  const [cropAspect, setCropAspect] = useState(4 / 3)
+  const [cropTarget, setCropTarget] = useState(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedPixels, setCroppedPixels] = useState(null)
 
   const [categoryForm, setCategoryForm] = useState({
     id: null,
@@ -134,6 +152,7 @@ export function AdminDashboard() {
             .map((item) => `${item.title} | ${item.description}`)
             .join("\n"),
           closingNote: contentData.about.closingNote || "",
+          galleryImages: contentData.about.galleryImages || [],
         })
         setTeamMembers(contentData.about.team || [])
       }
@@ -146,6 +165,20 @@ export function AdminDashboard() {
           locationText: contentData.contact.locationText || "",
           nextStepsText: (contentData.contact.nextSteps || []).join("\n"),
           requirementsText: (contentData.contact.requirements || []).join("\n"),
+        })
+      }
+      if (contentData?.home) {
+        const heroCards = Array.isArray(contentData.home.heroCards)
+          ? contentData.home.heroCards
+          : []
+        setHomeForm({
+          heroCards:
+            heroCards.length > 0
+              ? heroCards
+              : [
+                  { imageUrl: "", caption: "" },
+                  { imageUrl: "", caption: "" },
+                ],
         })
       }
     } catch (err) {
@@ -316,12 +349,107 @@ export function AdminDashboard() {
       })
       .filter(Boolean)
 
+  const resolveImageUrl = (url) => {
+    if (!url) return ""
+    if (url.startsWith("http") || url.startsWith("data:")) return url
+    if (url.startsWith("/uploads/")) return `${API_URL}${url}`
+    return url
+  }
+
+  const createImage = (url) =>
+    new Promise((resolve, reject) => {
+      const image = new Image()
+      image.addEventListener("load", () => resolve(image))
+      image.addEventListener("error", (error) => reject(error))
+      image.setAttribute("crossOrigin", "anonymous")
+      image.src = url
+    })
+
+  const getCroppedBlob = async (imageSrc, pixelCrop) => {
+    const image = await createImage(imageSrc)
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
+    canvas.width = pixelCrop.width
+    canvas.height = pixelCrop.height
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    )
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.92)
+    })
+  }
+
+  const openCropper = (file, target, aspect = 4 / 3) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      setCropImageSrc(reader.result?.toString() || "")
+      setCropAspect(aspect)
+      setCropTarget(target)
+      setCrop({ x: 0, y: 0 })
+      setZoom(1)
+      setCroppedPixels(null)
+      setCropOpen(true)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleCropSave = async () => {
+    if (!cropImageSrc || !croppedPixels || !cropTarget) return
+    try {
+      const blob = await getCroppedBlob(cropImageSrc, croppedPixels)
+      if (!blob) return
+      const formData = new FormData()
+      formData.append("image", new File([blob], "crop.jpg", { type: blob.type }))
+      const data = await apiFetch("/api/admin/media/upload", {
+        method: "POST",
+        body: formData,
+      })
+      if (data?.imageUrl) {
+        if (cropTarget.section === "about") {
+          setAboutForm((prev) => {
+            const next = [...(prev.galleryImages || [])]
+            next[cropTarget.index] = data.imageUrl
+            return { ...prev, galleryImages: next }
+          })
+        }
+        if (cropTarget.section === "home") {
+          setHomeForm((prev) => {
+            const next = [...(prev.heroCards || [])]
+            if (!next[cropTarget.index]) {
+              next[cropTarget.index] = { imageUrl: "", caption: "" }
+            }
+            next[cropTarget.index] = {
+              ...next[cropTarget.index],
+              imageUrl: data.imageUrl,
+            }
+            return { ...prev, heroCards: next }
+          })
+        }
+      }
+      setCropOpen(false)
+      setCropImageSrc("")
+      setCropTarget(null)
+      setError("")
+    } catch (err) {
+      setError(err.message || "Failed to crop image.")
+    }
+  }
+
   const saveAboutContent = async (nextTeamMembers = teamMembers) => {
     const payload = {
       heroTitle: aboutForm.heroTitle,
       heroSubtitle: aboutForm.heroSubtitle,
       approach: parseApproach(aboutForm.approachText),
       closingNote: aboutForm.closingNote,
+      galleryImages: aboutForm.galleryImages || [],
       team: nextTeamMembers,
     }
     try {
@@ -337,6 +465,7 @@ export function AdminDashboard() {
             .map((item) => `${item.title} | ${item.description}`)
             .join("\n"),
           closingNote: updated.about.closingNote || "",
+          galleryImages: updated.about.galleryImages || [],
         })
         setTeamMembers(updated.about.team || [])
       }
@@ -375,6 +504,26 @@ export function AdminDashboard() {
       setError("")
     } catch (err) {
       setError(err.message || "Failed to save contact content.")
+    }
+  }
+
+  const saveHomeContent = async () => {
+    const payload = {
+      heroCards: homeForm.heroCards,
+    }
+    try {
+      const updated = await apiFetch("/api/admin/content/home", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      })
+      if (updated?.home) {
+        setHomeForm({
+          heroCards: updated.home.heroCards || [],
+        })
+      }
+      setError("")
+    } catch (err) {
+      setError(err.message || "Failed to save home content.")
     }
   }
 
@@ -1296,6 +1445,46 @@ export function AdminDashboard() {
                           }))
                         }
                       />
+                      <div className="grid gap-3">
+                        <div className="text-sm font-medium text-ink">
+                          About images (3)
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          {[0, 1, 2].map((index) => {
+                            const imageUrl = aboutForm.galleryImages?.[index] || ""
+                            return (
+                              <div
+                                key={`about-image-${index}`}
+                                className="rounded-xl border border-fog bg-white p-3 text-xs text-slate"
+                              >
+                                <div className="mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg bg-sand">
+                                  {imageUrl ? (
+                                    <img
+                                      src={resolveImageUrl(imageUrl)}
+                                      alt={`About ${index + 1}`}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full items-center justify-center text-ink/40">
+                                      No image
+                                    </div>
+                                  )}
+                                </div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) {
+                                      openCropper(file, { section: "about", index }, 4 / 3)
+                                    }
+                                  }}
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
                       <Button type="submit">Save about content</Button>
                     </form>
                   </CardContent>
@@ -1494,11 +1683,123 @@ export function AdminDashboard() {
                     </form>
                   </CardContent>
                 </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Home hero images</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <form
+                      className="grid gap-4"
+                      onSubmit={async (event) => {
+                        event.preventDefault()
+                        await saveHomeContent()
+                      }}
+                    >
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {[0, 1].map((index) => {
+                          const card = homeForm.heroCards?.[index] || {
+                            imageUrl: "",
+                            caption: "",
+                          }
+                          return (
+                            <div
+                              key={`home-hero-${index}`}
+                              className="rounded-xl border border-fog bg-white p-3"
+                            >
+                              <div className="mb-3 aspect-[16/9] w-full overflow-hidden rounded-lg bg-sand">
+                                {card.imageUrl ? (
+                                  <img
+                                    src={resolveImageUrl(card.imageUrl)}
+                                    alt={`Hero ${index + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center text-xs text-ink/40">
+                                    No image
+                                  </div>
+                                )}
+                              </div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) {
+                                    openCropper(file, { section: "home", index }, 16 / 9)
+                                  }
+                                }}
+                              />
+                              <Input
+                                className="mt-3"
+                                placeholder="Caption"
+                                value={card.caption || ""}
+                                onChange={(e) =>
+                                  setHomeForm((prev) => {
+                                    const next = [...(prev.heroCards || [])]
+                                    if (!next[index]) {
+                                      next[index] = { imageUrl: "", caption: "" }
+                                    }
+                                    next[index] = {
+                                      ...next[index],
+                                      caption: e.target.value,
+                                    }
+                                    return { ...prev, heroCards: next }
+                                  })
+                                }
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <Button type="submit">Save home images</Button>
+                    </form>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </section>
         </div>
       </Container>
+
+      <Dialog open={cropOpen} onOpenChange={setCropOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Crop image</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative h-[360px] w-full overflow-hidden rounded-xl bg-slate-900">
+              {cropImageSrc && (
+                <Cropper
+                  image={cropImageSrc}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={cropAspect}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={(area, pixels) => setCroppedPixels(pixels)}
+                />
+              )}
+            </div>
+            <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.01}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+              />
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setCropOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCropSave}>Save crop</Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

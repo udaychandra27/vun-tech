@@ -22,6 +22,7 @@ const aboutSchema = new mongoose.Schema(
   {
     heroTitle: { type: String, default: "" },
     heroSubtitle: { type: String, default: "" },
+    galleryImages: { type: [String], default: [] },
     approach: { type: [approachSchema], default: [] },
     team: { type: [teamMemberSchema], default: [] },
     closingNote: { type: String, default: "" },
@@ -42,11 +43,27 @@ const contactSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const homeHeroCardSchema = new mongoose.Schema(
+  {
+    imageUrl: { type: String, default: "" },
+    caption: { type: String, default: "" },
+  },
+  { _id: false }
+)
+
+const homeSchema = new mongoose.Schema(
+  {
+    heroCards: { type: [homeHeroCardSchema], default: [] },
+  },
+  { _id: false }
+)
+
 const siteContentSchema = new mongoose.Schema(
   {
     key: { type: String, required: true, unique: true },
     about: { type: aboutSchema, default: () => ({}) },
     contact: { type: contactSchema, default: () => ({}) },
+    home: { type: homeSchema, default: () => ({}) },
   },
   { timestamps: true }
 )

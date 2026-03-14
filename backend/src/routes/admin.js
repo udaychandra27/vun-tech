@@ -18,12 +18,35 @@ import { requireAuth } from "../middleware/auth.js"
 
 const router = express.Router()
 
-const uploadRoot = path.join(process.cwd(), "uploads", "team")
-fs.mkdirSync(uploadRoot, { recursive: true })
+const teamUploadRoot = path.join(process.cwd(), "uploads", "team")
+const mediaUploadRoot = path.join(process.cwd(), "uploads", "media")
+fs.mkdirSync(teamUploadRoot, { recursive: true })
+fs.mkdirSync(mediaUploadRoot, { recursive: true })
 
-const upload = multer({
+const teamUpload = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadRoot),
+    destination: (req, file, cb) => cb(null, teamUploadRoot),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || ".jpg"
+      const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
+      cb(null, name)
+    },
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"]
+    if (!allowed.includes(file.mimetype)) {
+      const error = new Error("Only JPG, PNG, and WEBP images are allowed")
+      error.status = 400
+      return cb(error)
+    }
+    cb(null, true)
+  },
+})
+
+const mediaUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, mediaUploadRoot),
     filename: (req, file, cb) => {
       const ext = path.extname(file.originalname).toLowerCase() || ".jpg"
       const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
@@ -70,6 +93,7 @@ const projectSchema = z.object({
 const aboutContentSchema = z.object({
   heroTitle: z.string().min(2).max(140),
   heroSubtitle: z.string().min(10).max(600),
+  galleryImages: z.array(z.string().max(500)).optional().default([]),
   approach: z
     .array(
       z.object({
@@ -101,6 +125,18 @@ const contactContentSchema = z.object({
   locationText: z.string().max(200).optional().or(z.literal("")),
   nextSteps: z.array(z.string().min(2).max(140)).optional().default([]),
   requirements: z.array(z.string().min(2).max(140)).optional().default([]),
+})
+
+const homeContentSchema = z.object({
+  heroCards: z
+    .array(
+      z.object({
+        imageUrl: z.string().max(500).optional().or(z.literal("")),
+        caption: z.string().max(200).optional().or(z.literal("")),
+      })
+    )
+    .optional()
+    .default([]),
 })
 
 router.post("/admin/login", async (req, res, next) => {
@@ -571,16 +607,49 @@ router.put("/admin/content/contact", requireAuth, async (req, res, next) => {
   }
 })
 
+router.put("/admin/content/home", requireAuth, async (req, res, next) => {
+  try {
+    const payload = homeContentSchema.parse(req.body)
+    const content = await SiteContent.findOneAndUpdate(
+      { key: "default" },
+      { $set: { home: payload } },
+      { new: true, upsert: true }
+    )
+    res.json(content)
+  } catch (error) {
+    if (error?.issues) {
+      return res.status(400).json({ message: "Invalid input" })
+    }
+    next(error)
+  }
+})
+
 router.post(
   "/admin/team/upload",
   requireAuth,
-  upload.single("image"),
+  teamUpload.single("image"),
   async (req, res, next) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
       res.json({ imageUrl: `/uploads/team/${req.file.filename}` })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
+
+router.post(
+  "/admin/media/upload",
+  requireAuth,
+  mediaUpload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image uploaded" })
+      }
+      res.json({ imageUrl: `/uploads/media/${req.file.filename}` })
     } catch (error) {
       next(error)
     }
