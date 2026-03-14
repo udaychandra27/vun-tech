@@ -2,6 +2,9 @@ import express from "express"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { z } from "zod"
+import path from "path"
+import fs from "fs"
+import multer from "multer"
 import { Admin } from "../models/Admin.js"
 import { Contact } from "../models/Contact.js"
 import { Service } from "../models/Service.js"
@@ -10,9 +13,34 @@ import { ServiceCategory } from "../models/ServiceCategory.js"
 import { ChatLead } from "../models/ChatLead.js"
 import { Order } from "../models/Order.js"
 import { TrendingProduct } from "../models/TrendingProduct.js"
+import { SiteContent } from "../models/SiteContent.js"
 import { requireAuth } from "../middleware/auth.js"
 
 const router = express.Router()
+
+const uploadRoot = path.join(process.cwd(), "uploads", "team")
+fs.mkdirSync(uploadRoot, { recursive: true })
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadRoot),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || ".jpg"
+      const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
+      cb(null, name)
+    },
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"]
+    if (!allowed.includes(file.mimetype)) {
+      const error = new Error("Only JPG, PNG, and WEBP images are allowed")
+      error.status = 400
+      return cb(error)
+    }
+    cb(null, true)
+  },
+})
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -37,6 +65,42 @@ const projectSchema = z.object({
   outcome: z.string().max(240).optional().or(z.literal("")),
   stack: z.array(z.string().min(2).max(80)).optional().default([]),
   featured: z.boolean().optional().default(false),
+})
+
+const aboutContentSchema = z.object({
+  heroTitle: z.string().min(2).max(140),
+  heroSubtitle: z.string().min(10).max(600),
+  approach: z
+    .array(
+      z.object({
+        title: z.string().min(2).max(120),
+        description: z.string().min(5).max(400),
+      })
+    )
+    .optional()
+    .default([]),
+  team: z
+    .array(
+      z.object({
+        name: z.string().min(2).max(120),
+        role: z.string().min(2).max(120),
+        bio: z.string().max(400).optional().or(z.literal("")),
+        imageUrl: z.string().max(500).optional().or(z.literal("")),
+      })
+    )
+    .optional()
+    .default([]),
+  closingNote: z.string().max(400).optional().or(z.literal("")),
+})
+
+const contactContentSchema = z.object({
+  heroTitle: z.string().min(2).max(140),
+  heroSubtitle: z.string().min(10).max(600),
+  email: z.string().email().optional().or(z.literal("")),
+  whatsappUrl: z.string().max(500).optional().or(z.literal("")),
+  locationText: z.string().max(200).optional().or(z.literal("")),
+  nextSteps: z.array(z.string().min(2).max(140)).optional().default([]),
+  requirements: z.array(z.string().min(2).max(140)).optional().default([]),
 })
 
 router.post("/admin/login", async (req, res, next) => {
@@ -459,5 +523,68 @@ router.delete("/admin/projects/:id", requireAuth, async (req, res, next) => {
     next(error)
   }
 })
+
+router.get("/admin/content", requireAuth, async (req, res, next) => {
+  try {
+    const content = await SiteContent.findOne({ key: "default" })
+    if (!content) {
+      const created = await SiteContent.create({ key: "default" })
+      return res.json(created)
+    }
+    res.json(content)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put("/admin/content/about", requireAuth, async (req, res, next) => {
+  try {
+    const payload = aboutContentSchema.parse(req.body)
+    const content = await SiteContent.findOneAndUpdate(
+      { key: "default" },
+      { $set: { about: payload } },
+      { new: true, upsert: true }
+    )
+    res.json(content)
+  } catch (error) {
+    if (error?.issues) {
+      return res.status(400).json({ message: "Invalid input" })
+    }
+    next(error)
+  }
+})
+
+router.put("/admin/content/contact", requireAuth, async (req, res, next) => {
+  try {
+    const payload = contactContentSchema.parse(req.body)
+    const content = await SiteContent.findOneAndUpdate(
+      { key: "default" },
+      { $set: { contact: payload } },
+      { new: true, upsert: true }
+    )
+    res.json(content)
+  } catch (error) {
+    if (error?.issues) {
+      return res.status(400).json({ message: "Invalid input" })
+    }
+    next(error)
+  }
+})
+
+router.post(
+  "/admin/team/upload",
+  requireAuth,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image uploaded" })
+      }
+      res.json({ imageUrl: `/uploads/team/${req.file.filename}` })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 export default router

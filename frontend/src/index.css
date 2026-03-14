@@ -84,20 +84,23 @@
     position: relative;
     overflow: hidden;
     transition: transform 200ms ease, box-shadow 200ms ease;
+    border-radius: 1.75rem;
+    border: 1px solid rgba(226, 232, 240, 0.7);
+    background: #f5f7fb;
+    box-shadow:
+      0 10px 22px rgba(15, 23, 42, 0.08),
+      0 2px 8px rgba(15, 23, 42, 0.04);
   }
 
   .team-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 0.75rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    pointer-events: none;
+    content: none;
   }
 
   .team-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+    box-shadow:
+      0 16px 28px rgba(15, 23, 42, 0.12),
+      0 4px 12px rgba(15, 23, 42, 0.06);
   }
 
   .team-badge {
@@ -116,13 +119,17 @@
   .team-avatar {
     display: grid;
     place-items: center;
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+    width: 150px;
+    height: 150px;
+    border-radius: 999px;
     background: #0f172a;
     color: #f5f3ef;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.45rem;
+    overflow: hidden;
+    border: 6px solid #ffffff;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    margin: 0 auto;
   }
 
 }

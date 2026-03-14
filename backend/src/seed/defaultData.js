@@ -267,3 +267,64 @@ export const defaultTrendingProducts = [
     active: true,
   },
 ]
+
+export const defaultSiteContent = {
+  about: {
+    heroTitle: "Small team, serious delivery",
+    heroSubtitle:
+      "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
+    approach: [
+      {
+        title: "Discovery",
+        description: "We define scope, outcomes, risks, and a practical roadmap.",
+      },
+      {
+        title: "Delivery",
+        description: "Weekly updates, tight feedback loops, and clear milestones.",
+      },
+      {
+        title: "Stewardship",
+        description: "We document, maintain, and improve the system after launch.",
+      },
+    ],
+    team: [
+      {
+        name: "Uday Chandra",
+        role: "Founder & Delivery Lead",
+        bio: "Focused on clear scope, dependable execution, and long-term maintainability.",
+        imageUrl: "",
+      },
+      {
+        name: "Vaani Sharma",
+        role: "Product & Client Strategy",
+        bio: "Focused on clear scope, dependable execution, and long-term maintainability.",
+        imageUrl: "",
+      },
+      {
+        name: "Nitesh Pal",
+        role: "Engineering & Systems",
+        bio: "Focused on clear scope, dependable execution, and long-term maintainability.",
+        imageUrl: "",
+      },
+    ],
+    closingNote:
+      "We work best with teams who value clear communication, respect time, and want solutions that last. If that sounds like you, we should talk.",
+  },
+  contact: {
+    heroTitle: "Tell us about your project",
+    heroSubtitle: "Share your goals and timelines. We will reply with clear next steps.",
+    email: "hello@techservices.agency",
+    whatsappUrl: "https://wa.me/1234567890",
+    locationText: "We are based in the US and work remotely.",
+    nextSteps: [
+      "We review your request.",
+      "We confirm scope and priorities.",
+      "You get a clear plan and timeline.",
+    ],
+    requirements: [
+      "A short description of the project.",
+      "Expected deadline or milestone.",
+      "Current links, docs, or references.",
+    ],
+  },
+}

@@ -3,6 +3,7 @@ import helmet from "helmet"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import dotenv from "dotenv"
+import path from "path"
 import publicRoutes from "./routes/public.js"
 import adminRoutes from "./routes/admin.js"
 import { connectDatabase } from "./config/db.js"
@@ -13,11 +14,13 @@ import { Service } from "./models/Service.js"
 import { ServiceCategory } from "./models/ServiceCategory.js"
 import { Project } from "./models/Project.js"
 import { TrendingProduct } from "./models/TrendingProduct.js"
+import { SiteContent } from "./models/SiteContent.js"
 import {
   defaultServices,
   defaultProjects,
   defaultCategories,
   defaultTrendingProducts,
+  defaultSiteContent,
 } from "./seed/defaultData.js"
 
 dotenv.config()
@@ -25,7 +28,11 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 5000
 
-app.use(helmet())
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+)
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
@@ -61,6 +68,7 @@ app.use("/api/admin/login", loginLimiter)
 
 app.use("/api", publicRoutes)
 app.use("/api", adminRoutes)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")))
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" })
@@ -90,6 +98,7 @@ async function ensureSeedData() {
   const serviceCount = await Service.countDocuments()
   const projectCount = await Project.countDocuments()
   const trendingCount = await TrendingProduct.countDocuments()
+  const contentCount = await SiteContent.countDocuments()
 
   if (categoryCount === 0) {
     await ServiceCategory.insertMany(defaultCategories)
@@ -114,6 +123,10 @@ async function ensureSeedData() {
   if (trendingCount === 0) {
     await TrendingProduct.insertMany(defaultTrendingProducts)
     console.log("Seeded trending products.")
+  }
+  if (contentCount === 0) {
+    await SiteContent.create({ key: "default", ...defaultSiteContent })
+    console.log("Seeded site content.")
   }
 }
 

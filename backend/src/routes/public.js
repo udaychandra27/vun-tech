@@ -8,6 +8,7 @@ import { ServiceCategory } from "../models/ServiceCategory.js"
 import { ChatLead } from "../models/ChatLead.js"
 import { Order } from "../models/Order.js"
 import { TrendingProduct } from "../models/TrendingProduct.js"
+import { SiteContent } from "../models/SiteContent.js"
 import Razorpay from "razorpay"
 import crypto from "crypto"
 
@@ -205,6 +206,24 @@ router.get("/trending", async (req, res, next) => {
       createdAt: -1,
     })
     res.json(products)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/content/about", async (req, res, next) => {
+  try {
+    const content = await SiteContent.findOne({ key: "default" })
+    res.json(content?.about || null)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/content/contact", async (req, res, next) => {
+  try {
+    const content = await SiteContent.findOne({ key: "default" })
+    res.json(content?.contact || null)
   } catch (error) {
     next(error)
   }

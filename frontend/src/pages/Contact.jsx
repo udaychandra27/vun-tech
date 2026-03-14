@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Container } from "@/components/layout/Container"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -24,6 +24,45 @@ export function Contact() {
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState({ type: "idle", message: "" })
+  const [content, setContent] = useState({
+    heroTitle: "Tell us about your project",
+    heroSubtitle: "Share your goals and timelines. We will reply with clear next steps.",
+    email: CONTACT_EMAIL,
+    whatsappUrl: WHATSAPP_URL,
+    locationText: "We are based in the US and work remotely.",
+    nextSteps: [
+      "We review your request.",
+      "We confirm scope and priorities.",
+      "You get a clear plan and timeline.",
+    ],
+    requirements: [
+      "A short description of the project.",
+      "Expected deadline or milestone.",
+      "Current links, docs, or references.",
+    ],
+  })
+
+  useEffect(() => {
+    let mounted = true
+    apiFetch("/api/content/contact")
+      .then((data) => {
+        if (!mounted || !data) return
+        setContent((prev) => ({
+          ...prev,
+          ...data,
+          email: data.email || prev.email,
+          whatsappUrl: data.whatsappUrl || prev.whatsappUrl,
+          nextSteps: data.nextSteps?.length ? data.nextSteps : prev.nextSteps,
+          requirements: data.requirements?.length
+            ? data.requirements
+            : prev.requirements,
+        }))
+      })
+      .catch(() => {})
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -89,9 +128,9 @@ export function Contact() {
         <GradientOrbs />
         <Container className="py-14">
           <SectionBadge>Contact</SectionBadge>
-          <h1 className="text-4xl font-semibold">Tell us about your project</h1>
+          <h1 className="text-4xl font-semibold">{content.heroTitle}</h1>
           <p className="mt-4 max-w-2xl text-lg text-slate">
-            Share your goals and timelines. We will reply with clear next steps.
+            {content.heroSubtitle}
           </p>
         </Container>
       </section>
@@ -210,14 +249,14 @@ export function Contact() {
                 <CardTitle>Direct contact</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-slate">
-                <div>Email: {CONTACT_EMAIL}</div>
+                <div>Email: {content.email}</div>
                 <div>
                   WhatsApp:{" "}
-                  <a className="text-moss" href={WHATSAPP_URL}>
+                  <a className="text-moss" href={content.whatsappUrl}>
                     Message us
                   </a>
                 </div>
-                <div>We are based in the US and work remotely.</div>
+                <div>{content.locationText}</div>
               </CardContent>
             </Card>
             <Card>
@@ -225,9 +264,13 @@ export function Contact() {
                 <CardTitle>What happens next</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-slate">
-                <div>1. We review your request.</div>
-                <div>2. We confirm scope and priorities.</div>
-                <div>3. You get a clear plan and timeline.</div>
+                <ol className="space-y-2">
+                  {content.nextSteps.map((step, index) => (
+                    <li key={step}>
+                      {index + 1}. {step}
+                    </li>
+                  ))}
+                </ol>
               </CardContent>
             </Card>
             <Card className="glass-card">
@@ -235,9 +278,11 @@ export function Contact() {
                 <CardTitle>What we need from you</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-slate">
-                <div>• A short description of the project.</div>
-                <div>• Expected deadline or milestone.</div>
-                <div>• Current links, docs, or references.</div>
+                <ul className="space-y-2">
+                  {content.requirements.map((item) => (
+                    <li key={item}>- {item}</li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           </div>
@@ -246,3 +291,4 @@ export function Contact() {
     </div>
   )
 }
+

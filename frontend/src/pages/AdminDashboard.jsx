@@ -8,7 +8,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { apiFetch, setAuthToken } from "@/lib/api"
 
-const tabs = ["contacts", "chat leads", "orders", "trending", "services", "categories", "work"]
+const tabs = [
+  "contacts",
+  "chat leads",
+  "orders",
+  "trending",
+  "services",
+  "categories",
+  "work",
+  "pages",
+]
 
 export function AdminDashboard() {
   const navigate = useNavigate()
@@ -45,6 +54,31 @@ export function AdminDashboard() {
     featured: false,
   })
 
+  const [aboutForm, setAboutForm] = useState({
+    heroTitle: "",
+    heroSubtitle: "",
+    approachText: "",
+    closingNote: "",
+  })
+
+  const [contactForm, setContactForm] = useState({
+    heroTitle: "",
+    heroSubtitle: "",
+    email: "",
+    whatsappUrl: "",
+    locationText: "",
+    nextStepsText: "",
+    requirementsText: "",
+  })
+
+  const [teamMembers, setTeamMembers] = useState([])
+  const [teamForm, setTeamForm] = useState({
+    id: null,
+    name: "",
+    role: "",
+    imageUrl: "",
+  })
+
   const [categoryForm, setCategoryForm] = useState({
     id: null,
     title: "",
@@ -73,6 +107,7 @@ export function AdminDashboard() {
         servicesData,
         categoriesData,
         projectsData,
+        contentData,
       ] =
         await Promise.all([
           apiFetch("/api/admin/contacts"),
@@ -82,6 +117,7 @@ export function AdminDashboard() {
           apiFetch("/api/admin/services"),
           apiFetch("/api/admin/categories"),
           apiFetch("/api/admin/projects"),
+          apiFetch("/api/admin/content"),
         ])
       setContacts(contactsData)
       setChatLeads(chatLeadsData)
@@ -90,6 +126,28 @@ export function AdminDashboard() {
       setServices(servicesData)
       setCategories(categoriesData)
       setProjects(projectsData)
+      if (contentData?.about) {
+        setAboutForm({
+          heroTitle: contentData.about.heroTitle || "",
+          heroSubtitle: contentData.about.heroSubtitle || "",
+          approachText: (contentData.about.approach || [])
+            .map((item) => `${item.title} | ${item.description}`)
+            .join("\n"),
+          closingNote: contentData.about.closingNote || "",
+        })
+        setTeamMembers(contentData.about.team || [])
+      }
+      if (contentData?.contact) {
+        setContactForm({
+          heroTitle: contentData.contact.heroTitle || "",
+          heroSubtitle: contentData.contact.heroSubtitle || "",
+          email: contentData.contact.email || "",
+          whatsappUrl: contentData.contact.whatsappUrl || "",
+          locationText: contentData.contact.locationText || "",
+          nextStepsText: (contentData.contact.nextSteps || []).join("\n"),
+          requirementsText: (contentData.contact.requirements || []).join("\n"),
+        })
+      }
     } catch (err) {
       setError(err.message || "Failed to load data.")
     } finally {
@@ -229,6 +287,139 @@ export function AdminDashboard() {
       stack: "",
       featured: false,
     })
+  }
+
+  const parseList = (text) =>
+    text
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean)
+
+  const parseApproach = (text) =>
+    parseList(text)
+      .map((line) => {
+        let title = ""
+        let description = ""
+        if (line.includes("|")) {
+          const parts = line.split("|").map((part) => part.trim())
+          title = parts[0]
+          description = parts.slice(1).join(" | ")
+        } else if (line.includes(" - ")) {
+          const parts = line.split(" - ").map((part) => part.trim())
+          title = parts[0]
+          description = parts.slice(1).join(" - ")
+        } else {
+          return null
+        }
+        if (!title || !description) return null
+        return { title, description }
+      })
+      .filter(Boolean)
+
+  const saveAboutContent = async (nextTeamMembers = teamMembers) => {
+    const payload = {
+      heroTitle: aboutForm.heroTitle,
+      heroSubtitle: aboutForm.heroSubtitle,
+      approach: parseApproach(aboutForm.approachText),
+      closingNote: aboutForm.closingNote,
+      team: nextTeamMembers,
+    }
+    try {
+      const updated = await apiFetch("/api/admin/content/about", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      })
+      if (updated?.about) {
+        setAboutForm({
+          heroTitle: updated.about.heroTitle || "",
+          heroSubtitle: updated.about.heroSubtitle || "",
+          approachText: (updated.about.approach || [])
+            .map((item) => `${item.title} | ${item.description}`)
+            .join("\n"),
+          closingNote: updated.about.closingNote || "",
+        })
+        setTeamMembers(updated.about.team || [])
+      }
+      setError("")
+    } catch (err) {
+      setError(err.message || "Failed to save about content.")
+    }
+  }
+
+  const saveContactContent = async () => {
+    const payload = {
+      heroTitle: contactForm.heroTitle,
+      heroSubtitle: contactForm.heroSubtitle,
+      email: contactForm.email,
+      whatsappUrl: contactForm.whatsappUrl,
+      locationText: contactForm.locationText,
+      nextSteps: parseList(contactForm.nextStepsText),
+      requirements: parseList(contactForm.requirementsText),
+    }
+    try {
+      const updated = await apiFetch("/api/admin/content/contact", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      })
+      if (updated?.contact) {
+        setContactForm({
+          heroTitle: updated.contact.heroTitle || "",
+          heroSubtitle: updated.contact.heroSubtitle || "",
+          email: updated.contact.email || "",
+          whatsappUrl: updated.contact.whatsappUrl || "",
+          locationText: updated.contact.locationText || "",
+          nextStepsText: (updated.contact.nextSteps || []).join("\n"),
+          requirementsText: (updated.contact.requirements || []).join("\n"),
+        })
+      }
+      setError("")
+    } catch (err) {
+      setError(err.message || "Failed to save contact content.")
+    }
+  }
+
+  const handleTeamSubmit = async (event) => {
+    event.preventDefault()
+    const payload = {
+      name: teamForm.name.trim(),
+      role: teamForm.role.trim(),
+      imageUrl: teamForm.imageUrl.trim(),
+    }
+    const tempId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}`
+    const nextTeam =
+      teamForm.id !== null
+        ? teamMembers.map((member) =>
+            member._id === teamForm.id ? { ...member, ...payload } : member
+          )
+        : [{ _id: tempId, ...payload }, ...teamMembers]
+
+    await saveAboutContent(nextTeam)
+    setTeamForm({ id: null, name: "", role: "", imageUrl: "" })
+  }
+
+  const handleTeamDelete = async (id) => {
+    const nextTeam = teamMembers.filter((member) => member._id !== id)
+    await saveAboutContent(nextTeam)
+  }
+
+  const handleTeamImageUpload = async (file) => {
+    try {
+      const formData = new FormData()
+      formData.append("image", file)
+      const data = await apiFetch("/api/admin/team/upload", {
+        method: "POST",
+        body: formData,
+      })
+      if (data?.imageUrl) {
+        setTeamForm((prev) => ({ ...prev, imageUrl: data.imageUrl }))
+      }
+      setError("")
+    } catch (err) {
+      setError(err.message || "Failed to upload image.")
+    }
   }
 
   const stats = useMemo(
@@ -1049,6 +1240,261 @@ export function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {active === "pages" && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>About page</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <form
+                      className="grid gap-3"
+                      onSubmit={async (event) => {
+                        event.preventDefault()
+                        await saveAboutContent()
+                      }}
+                    >
+                      <Input
+                        placeholder="Hero title"
+                        value={aboutForm.heroTitle}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            heroTitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Hero subtitle"
+                        value={aboutForm.heroSubtitle}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            heroSubtitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Approach (one per line, format: Title | Description)"
+                        value={aboutForm.approachText}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            approachText: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Closing note"
+                        value={aboutForm.closingNote}
+                        onChange={(e) =>
+                          setAboutForm((prev) => ({
+                            ...prev,
+                            closingNote: e.target.value,
+                          }))
+                        }
+                      />
+                      <Button type="submit">Save about content</Button>
+                    </form>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Team members</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <form className="grid gap-3" onSubmit={handleTeamSubmit}>
+                      <Input
+                        placeholder="Name"
+                        value={teamForm.name}
+                        onChange={(e) =>
+                          setTeamForm((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="Role"
+                        value={teamForm.role}
+                        onChange={(e) =>
+                          setTeamForm((prev) => ({
+                            ...prev,
+                            role: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="Image URL (optional)"
+                        value={teamForm.imageUrl}
+                        onChange={(e) =>
+                          setTeamForm((prev) => ({
+                            ...prev,
+                            imageUrl: e.target.value,
+                          }))
+                        }
+                      />
+                      <div className="grid gap-2">
+                        <label className="text-sm text-slate">
+                          Upload team image (JPG/PNG/WEBP, max 2MB)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              handleTeamImageUpload(file)
+                            }
+                          }}
+                        />
+                        {teamForm.imageUrl && (
+                          <div className="text-xs text-ink/70">
+                            Uploaded: {teamForm.imageUrl}
+                          </div>
+                        )}
+                      </div>
+                      <Button type="submit">
+                        {teamForm.id ? "Update team member" : "Add team member"}
+                      </Button>
+                    </form>
+
+                    <div className="space-y-3">
+                      {teamMembers.map((member) => (
+                        <div
+                          key={member._id}
+                          className="rounded-lg border border-fog bg-sand p-4"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <div className="font-semibold">{member.name}</div>
+                              <div className="text-xs text-slate">{member.role}</div>
+                              {member.imageUrl && (
+                                <div className="mt-1 text-xs text-ink/60">
+                                  Image: {member.imageUrl}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  setTeamForm({
+                                    id: member._id,
+                                    name: member.name,
+                                    role: member.role,
+                                    imageUrl: member.imageUrl || "",
+                                  })
+                                }
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleTeamDelete(member._id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Contact page</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <form
+                      className="grid gap-3"
+                      onSubmit={async (event) => {
+                        event.preventDefault()
+                        await saveContactContent()
+                      }}
+                    >
+                      <Input
+                        placeholder="Hero title"
+                        value={contactForm.heroTitle}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            heroTitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Hero subtitle"
+                        value={contactForm.heroSubtitle}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            heroSubtitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="Contact email"
+                        value={contactForm.email}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="WhatsApp URL"
+                        value={contactForm.whatsappUrl}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            whatsappUrl: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="Location line"
+                        value={contactForm.locationText}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            locationText: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Next steps (one per line)"
+                        value={contactForm.nextStepsText}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            nextStepsText: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Requirements (one per line)"
+                        value={contactForm.requirementsText}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            requirementsText: e.target.value,
+                          }))
+                        }
+                      />
+                      <Button type="submit">Save contact content</Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </section>
         </div>
