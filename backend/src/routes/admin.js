@@ -580,9 +580,23 @@ router.get("/admin/content", requireAuth, async (req, res, next) => {
 router.put("/admin/content/about", requireAuth, async (req, res, next) => {
   try {
     const payload = aboutContentSchema.parse(req.body)
+    const existing = await SiteContent.findOne({ key: "default" })
+    const mergedPayload = { ...payload }
+    if (
+      (!payload.team || payload.team.length === 0) &&
+      existing?.about?.team?.length
+    ) {
+      mergedPayload.team = existing.about.team
+    }
+    if (
+      (!payload.galleryImages || payload.galleryImages.length === 0) &&
+      existing?.about?.galleryImages?.length
+    ) {
+      mergedPayload.galleryImages = existing.about.galleryImages
+    }
     const content = await SiteContent.findOneAndUpdate(
       { key: "default" },
-      { $set: { about: payload } },
+      { $set: { about: mergedPayload } },
       { new: true, upsert: true }
     )
     res.json(content)
@@ -614,9 +628,17 @@ router.put("/admin/content/contact", requireAuth, async (req, res, next) => {
 router.put("/admin/content/home", requireAuth, async (req, res, next) => {
   try {
     const payload = homeContentSchema.parse(req.body)
+    const existing = await SiteContent.findOne({ key: "default" })
+    const mergedPayload = { ...payload }
+    if (
+      (!payload.heroCards || payload.heroCards.length === 0) &&
+      existing?.home?.heroCards?.length
+    ) {
+      mergedPayload.heroCards = existing.home.heroCards
+    }
     const content = await SiteContent.findOneAndUpdate(
       { key: "default" },
-      { $set: { home: payload } },
+      { $set: { home: mergedPayload } },
       { new: true, upsert: true }
     )
     res.json(content)
