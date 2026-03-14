@@ -33,6 +33,8 @@ export function SiteHeader() {
             <OptimizedImage
               src="/vun-logo.png"
               alt="VUN Tech logo"
+              width={64}
+              height={64}
               className="h-12 w-12 shrink-0 rounded-md object-cover sm:h-14 sm:w-14 md:h-16 md:w-16"
             />
             <div className="leading-tight">

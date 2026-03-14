@@ -3,8 +3,8 @@ import { Suspense, lazy } from "react"
 import { SiteHeader } from "@/components/layout/SiteHeader"
 import { SiteFooter } from "@/components/layout/SiteFooter"
 import { RequireAuth } from "@/routes/RequireAuth"
-
-const Home = lazy(() => import("@/pages/Home").then((m) => ({ default: m.Home })))
+import { Home } from "@/pages/Home"
+import { ChatWidget } from "@/components/ChatWidget"
 const Services = lazy(() =>
   import("@/pages/Services").then((m) => ({ default: m.Services }))
 )
@@ -27,9 +27,6 @@ const AdminLogin = lazy(() =>
 )
 const AdminDashboard = lazy(() =>
   import("@/pages/AdminDashboard").then((m) => ({ default: m.AdminDashboard }))
-)
-const ChatWidget = lazy(() =>
-  import("@/components/ChatWidget").then((m) => ({ default: m.ChatWidget }))
 )
 
 function App() {
@@ -61,9 +58,7 @@ function App() {
           </Suspense>
         </main>
         <SiteFooter />
-        <Suspense fallback={null}>
-          <ChatWidget />
-        </Suspense>
+        <ChatWidget />
       </div>
     </BrowserRouter>
   )

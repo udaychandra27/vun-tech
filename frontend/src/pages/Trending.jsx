@@ -141,6 +141,8 @@ export function Trending() {
                       <OptimizedImage
                         src={product.imageUrl}
                         alt={product.title}
+                        width={800}
+                        height={600}
                         className="h-36 w-full object-cover"
                       />
                     ) : (
@@ -183,6 +185,8 @@ export function Trending() {
                   <OptimizedImage
                     src={active.imageUrl}
                     alt={active.title}
+                    width={900}
+                    height={600}
                     className="h-44 w-full object-cover"
                   />
                 ) : (

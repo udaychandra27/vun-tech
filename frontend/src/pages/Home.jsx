@@ -68,21 +68,6 @@ export function Home() {
     return url
   }
 
-  useEffect(() => {
-    const heroUrl = homeContent.heroCards?.[0]?.imageUrl
-    if (!heroUrl) return
-    const resolved = resolveImageUrl(heroUrl)
-    const link = document.createElement("link")
-    link.rel = "preload"
-    link.as = "image"
-    link.href = resolved
-    link.setAttribute("fetchpriority", "high")
-    document.head.appendChild(link)
-    return () => {
-      document.head.removeChild(link)
-    }
-  }, [homeContent.heroCards])
-
   const openOffer = (offer) => {
     setActiveOffer(offer)
     setOfferStatus({ type: "idle", message: "" })
@@ -234,6 +219,8 @@ export function Home() {
                         src={resolveImageUrl(card.imageUrl)}
                         alt={`Hero ${index + 1}`}
                         priority={index === 0}
+                        width={1200}
+                        height={675}
                         className="h-40 w-full object-cover"
                       />
                     ) : (

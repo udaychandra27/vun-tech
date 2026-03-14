@@ -174,6 +174,8 @@ export function About() {
                         <OptimizedImage
                           src={resolveImageUrl(member.imageUrl)}
                           alt={member.name}
+                          width={600}
+                          height={600}
                           className="team-avatar-image"
                           onLoad={(e) => {
                             const initials = e.currentTarget.previousSibling

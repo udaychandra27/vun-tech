@@ -1750,6 +1750,8 @@ export function AdminDashboard() {
                                   <OptimizedImage
                                     src={resolveImageUrl(card.imageUrl)}
                                     alt={`Hero ${index + 1}`}
+                                    width={1200}
+                                    height={675}
                                     className="h-full w-full object-cover"
                                   />
                                 ) : (
