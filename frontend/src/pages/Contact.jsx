@@ -177,7 +177,7 @@ export function Contact() {
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
-                      placeholder="+1 555 000 1234"
+                      placeholder="+91 999 999 9999"
                     />
                     {errors.phone && (
                       <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
@@ -249,7 +249,12 @@ export function Contact() {
                 <CardTitle>Direct contact</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-slate">
-                <div>Email: {content.email}</div>
+                <div>
+                  Email:{" "}
+                  <a className="text-moss" href={`mailto:${content.email}`}>
+                    {content.email}
+                  </a>
+                </div>
                 <div>
                   WhatsApp:{" "}
                   <a className="text-moss" href={content.whatsappUrl}>
