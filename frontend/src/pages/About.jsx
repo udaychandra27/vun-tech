@@ -45,12 +45,17 @@ export function About() {
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("aboutGalleryImages") || "null")
       : null
+  const storedTeam =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("aboutTeamMembers") || "null")
+      : null
   const [content, setContent] = useState({
     heroTitle: "Small team, serious delivery",
     heroSubtitle:
       "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
     approach: defaultApproach,
-    team: defaultTeam,
+    team:
+      Array.isArray(storedTeam) && storedTeam.length > 0 ? storedTeam : defaultTeam,
     galleryImages:
       Array.isArray(storedGallery) && storedGallery.length === 3
         ? storedGallery
@@ -91,6 +96,9 @@ export function About() {
             "aboutGalleryImages",
             JSON.stringify(data.galleryImages)
           )
+        }
+        if (Array.isArray(data.team) && data.team.length > 0) {
+          localStorage.setItem("aboutTeamMembers", JSON.stringify(data.team))
         }
       })
       .catch(() => {})

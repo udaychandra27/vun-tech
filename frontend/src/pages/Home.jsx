@@ -18,8 +18,12 @@ import { Input } from "@/components/ui/input"
 export function Home() {
   const [services, setServices] = useState(featuredServices)
   const [projects, setProjects] = useState(defaultProjects)
+  const storedHome =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("homeHeroCards") || "null")
+      : null
   const [homeContent, setHomeContent] = useState({
-    heroCards: [],
+    heroCards: Array.isArray(storedHome) ? storedHome : [],
   })
   const [offerOpen, setOfferOpen] = useState(false)
   const [activeOffer, setActiveOffer] = useState(null)
@@ -50,6 +54,7 @@ export function Home() {
       .then((data) => {
         if (data?.heroCards?.length) {
           setHomeContent({ heroCards: data.heroCards })
+          localStorage.setItem("homeHeroCards", JSON.stringify(data.heroCards))
         }
       })
       .catch(() => {})
