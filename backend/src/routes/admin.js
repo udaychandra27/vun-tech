@@ -640,12 +640,16 @@ router.post(
   upload.single("image"),
   async (req, res, next) => {
     try {
+      if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        return res.status(500).json({ message: "Cloudinary not configured" })
+      }
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
       const result = await uploadToCloudinary(req.file, "team")
       res.json({ imageUrl: result.secure_url })
     } catch (error) {
+      console.error("Team upload error:", error)
       next(error)
     }
   }
@@ -657,12 +661,16 @@ router.post(
   upload.single("image"),
   async (req, res, next) => {
     try {
+      if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        return res.status(500).json({ message: "Cloudinary not configured" })
+      }
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
       const result = await uploadToCloudinary(req.file, "media")
       res.json({ imageUrl: result.secure_url })
     } catch (error) {
+      console.error("Media upload error:", error)
       next(error)
     }
   }
