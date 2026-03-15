@@ -2,9 +2,8 @@ import express from "express"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { z } from "zod"
-import path from "path"
-import fs from "fs"
 import multer from "multer"
+import { v2 as cloudinary } from "cloudinary"
 import { Admin } from "../models/Admin.js"
 import { Contact } from "../models/Contact.js"
 import { Service } from "../models/Service.js"
@@ -18,20 +17,14 @@ import { requireAuth } from "../middleware/auth.js"
 
 const router = express.Router()
 
-const teamUploadRoot = path.join(process.cwd(), "uploads", "team")
-const mediaUploadRoot = path.join(process.cwd(), "uploads", "media")
-fs.mkdirSync(teamUploadRoot, { recursive: true })
-fs.mkdirSync(mediaUploadRoot, { recursive: true })
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
-const teamUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, teamUploadRoot),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase() || ".jpg"
-      const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
-      cb(null, name)
-    },
-  }),
+const upload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ["image/jpeg", "image/png", "image/webp"]
@@ -44,26 +37,17 @@ const teamUpload = multer({
   },
 })
 
-const mediaUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, mediaUploadRoot),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase() || ".jpg"
-      const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
-      cb(null, name)
-    },
-  }),
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ["image/jpeg", "image/png", "image/webp"]
-    if (!allowed.includes(file.mimetype)) {
-      const error = new Error("Only JPG, PNG, and WEBP images are allowed")
-      error.status = 400
-      return cb(error)
-    }
-    cb(null, true)
-  },
-})
+const uploadToCloudinary = (file, folder) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: "image" },
+      (error, result) => {
+        if (error) return reject(error)
+        resolve(result)
+      }
+    )
+    stream.end(file.buffer)
+  })
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -653,13 +637,14 @@ router.put("/admin/content/home", requireAuth, async (req, res, next) => {
 router.post(
   "/admin/team/upload",
   requireAuth,
-  teamUpload.single("image"),
+  upload.single("image"),
   async (req, res, next) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
-      res.json({ imageUrl: `/uploads/team/${req.file.filename}` })
+      const result = await uploadToCloudinary(req.file, "team")
+      res.json({ imageUrl: result.secure_url })
     } catch (error) {
       next(error)
     }
@@ -669,13 +654,14 @@ router.post(
 router.post(
   "/admin/media/upload",
   requireAuth,
-  mediaUpload.single("image"),
+  upload.single("image"),
   async (req, res, next) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
-      res.json({ imageUrl: `/uploads/media/${req.file.filename}` })
+      const result = await uploadToCloudinary(req.file, "media")
+      res.json({ imageUrl: result.secure_url })
     } catch (error) {
       next(error)
     }
