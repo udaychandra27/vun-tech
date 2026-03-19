@@ -116,6 +116,12 @@ async function sendContactEmails(payload) {
   ])
 }
 
+function queueContactEmails(payload) {
+  sendContactEmails(payload).catch((error) => {
+    console.error("Contact email error:", error)
+  })
+}
+
 router.post("/contact", async (req, res, next) => {
   try {
     const payload = contactSchema.parse(req.body)
@@ -126,8 +132,8 @@ router.post("/contact", async (req, res, next) => {
       company: payload.company || "",
       message: payload.message,
     })
-    await sendContactEmails(payload)
     res.status(201).json({ id: contact._id })
+    queueContactEmails(payload)
   } catch (error) {
     console.error("Contact error:", error)
     if (error?.issues) {
