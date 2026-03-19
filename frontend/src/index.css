@@ -146,4 +146,32 @@
     transition: opacity 150ms ease;
   }
 
+  .blog-content img {
+    border-radius: 1.5rem;
+  }
+
+  .blog-content figure[data-type="blog-image"] {
+    margin: 2rem 0;
+  }
+
+  .blog-content figcaption {
+    margin-top: 0.75rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .blog-content .blog-callout {
+    border-radius: 1.5rem;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    background: rgba(37, 99, 235, 0.08);
+    padding: 1rem 1.25rem;
+    color: #0f172a;
+  }
+
+  .blog-content iframe {
+    width: 100%;
+    min-height: 360px;
+    border-radius: 1.5rem;
+  }
 }

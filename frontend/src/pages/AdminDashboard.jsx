@@ -629,9 +629,14 @@ export function AdminDashboard() {
             <h1 className="text-3xl font-semibold">Admin dashboard</h1>
             <p className="text-sm text-slate">Manage inquiries and content.</p>
           </div>
-          <Button variant="outline" onClick={handleLogout}>
-            Log out
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={() => navigate("/admin/blog")}>
+              Manage blog
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              Log out
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-[220px_1fr]">

@@ -28,6 +28,18 @@ const AdminLogin = lazy(() =>
 const AdminDashboard = lazy(() =>
   import("@/pages/AdminDashboard").then((m) => ({ default: m.AdminDashboard }))
 )
+const BlogList = lazy(() =>
+  import("@/pages/BlogList").then((m) => ({ default: m.BlogList }))
+)
+const BlogDetail = lazy(() =>
+  import("@/pages/BlogDetail").then((m) => ({ default: m.BlogDetail }))
+)
+const AdminBlogManager = lazy(() =>
+  import("@/pages/AdminBlogManager").then((m) => ({ default: m.AdminBlogManager }))
+)
+const AdminBlogEditor = lazy(() =>
+  import("@/pages/AdminBlogEditor").then((m) => ({ default: m.AdminBlogEditor }))
+)
 
 function App() {
   return (
@@ -43,6 +55,8 @@ function App() {
               <Route path="/work" element={<Work />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<BlogList />} />
+              <Route path="/blog/:slug" element={<BlogDetail />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/admin" element={<AdminLogin />} />
@@ -51,6 +65,30 @@ function App() {
                 element={
                   <RequireAuth>
                     <AdminDashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/blog"
+                element={
+                  <RequireAuth>
+                    <AdminBlogManager />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/blog/new"
+                element={
+                  <RequireAuth>
+                    <AdminBlogEditor />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/blog/:id/edit"
+                element={
+                  <RequireAuth>
+                    <AdminBlogEditor />
                   </RequireAuth>
                 }
               />

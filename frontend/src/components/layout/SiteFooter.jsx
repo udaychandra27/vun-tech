@@ -10,6 +10,7 @@ export function SiteFooter() {
           <div>Reliable software delivery for teams that value clarity.</div>
         </div>
         <div className="flex flex-wrap items-center gap-4">
+          <Link to="/blog">Blog</Link>
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
           <Link to="/admin">Admin</Link>

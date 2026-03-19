@@ -34,7 +34,7 @@ export async function apiFetch(path, options = {}) {
     try {
       const data = await response.json()
       message = data?.message || message
-    } catch (error) {
+    } catch {
       message = await response.text()
     }
     throw new Error(message)

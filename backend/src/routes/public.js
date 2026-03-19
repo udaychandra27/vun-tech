@@ -9,6 +9,8 @@ import { ChatLead } from "../models/ChatLead.js"
 import { Order } from "../models/Order.js"
 import { TrendingProduct } from "../models/TrendingProduct.js"
 import { SiteContent } from "../models/SiteContent.js"
+import { BlogPost } from "../models/BlogPost.js"
+import { buildBlogMeta } from "../utils/blog.js"
 import Razorpay from "razorpay"
 import crypto from "crypto"
 
@@ -233,6 +235,130 @@ router.get("/content/home", async (req, res, next) => {
   try {
     const content = await SiteContent.findOne({ key: "default" })
     res.json(content?.home || null)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/blog", async (req, res, next) => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1)
+    const limit = Math.min(24, Math.max(1, Number(req.query.limit) || 6))
+    const search = (req.query.search || "").trim()
+    const tag = (req.query.tag || "").trim()
+    const category = (req.query.category || "").trim()
+
+    const filter = { status: "published" }
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { excerpt: { $regex: search, $options: "i" } },
+        { author: { $regex: search, $options: "i" } },
+        { tags: { $regex: search, $options: "i" } },
+      ]
+    }
+    if (tag) {
+      filter.tags = tag
+    }
+    if (category) {
+      filter.category = category
+    }
+
+    const [items, total, tags, categories] = await Promise.all([
+      BlogPost.find(filter)
+        .sort({ publishedAt: -1, createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .select("-content"),
+      BlogPost.countDocuments(filter),
+      BlogPost.distinct("tags", { status: "published" }),
+      BlogPost.distinct("category", { status: "published", category: { $ne: "" } }),
+    ])
+
+    res.json({
+      items: items.map((post) => {
+        const item = post.toObject()
+        return { ...item, meta: buildBlogMeta(item) }
+      }),
+      filters: {
+        tags: tags.filter(Boolean).sort((a, b) => a.localeCompare(b)),
+        categories: categories.filter(Boolean).sort((a, b) => a.localeCompare(b)),
+      },
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/blog/sitemap", async (req, res, next) => {
+  try {
+    const posts = await BlogPost.find(
+      { status: "published" },
+      { slug: 1, updatedAt: 1, publishedAt: 1 }
+    ).sort({ publishedAt: -1, createdAt: -1 })
+    res.json(
+      posts.map((post) => ({
+        slug: post.slug,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+      }))
+    )
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/blog/:slug", async (req, res, next) => {
+  try {
+    const post = await BlogPost.findOne({
+      slug: req.params.slug,
+      status: "published",
+    })
+    if (!post) {
+      return res.status(404).json({ message: "Blog post not found" })
+    }
+
+    const related = await BlogPost.find({
+      _id: { $ne: post._id },
+      status: "published",
+      $or: [
+        { category: post.category || "__none__" },
+        { tags: { $in: post.tags || [] } },
+      ],
+    })
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .limit(3)
+      .select("-content")
+
+    const payload = post.toObject()
+    res.json({
+      ...payload,
+      meta: buildBlogMeta(payload),
+      relatedPosts: related.map((item) => ({
+        ...item.toObject(),
+        meta: buildBlogMeta(item),
+      })),
+      structuredData: {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: payload.seoTitle || payload.title,
+        description: payload.seoDescription || payload.excerpt,
+        image: payload.featuredImage || undefined,
+        datePublished: payload.publishedAt,
+        dateModified: payload.updatedAt,
+        author: {
+          "@type": "Person",
+          name: payload.author,
+        },
+        mainEntityOfPage: `/blog/${payload.slug}`,
+      },
+    })
   } catch (error) {
     next(error)
   }

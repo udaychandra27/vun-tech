@@ -4,7 +4,10 @@ import bcrypt from "bcrypt"
 import { z } from "zod"
 import multer from "multer"
 import { v2 as cloudinary } from "cloudinary"
+import fs from "fs/promises"
+import path from "path"
 import { Admin } from "../models/Admin.js"
+import { BlogPost } from "../models/BlogPost.js"
 import { Contact } from "../models/Contact.js"
 import { Service } from "../models/Service.js"
 import { Project } from "../models/Project.js"
@@ -14,6 +17,13 @@ import { Order } from "../models/Order.js"
 import { TrendingProduct } from "../models/TrendingProduct.js"
 import { SiteContent } from "../models/SiteContent.js"
 import { requireAuth } from "../middleware/auth.js"
+import {
+  buildBlogMeta,
+  buildExcerpt,
+  calculateReadTime,
+  sanitizeBlogHtml,
+  slugifyBlogTitle,
+} from "../utils/blog.js"
 
 const router = express.Router()
 
@@ -22,6 +32,14 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
+
+function hasCloudinaryConfig() {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+  )
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -48,6 +66,16 @@ const uploadToCloudinary = (file, folder) =>
     )
     stream.end(file.buffer)
   })
+
+async function saveLocally(file, folder) {
+  const uploadsDir = path.join(process.cwd(), "uploads", folder)
+  await fs.mkdir(uploadsDir, { recursive: true })
+  const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "-")
+  const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${safeName}`
+  const relativePath = `/uploads/${folder}/${fileName}`
+  await fs.writeFile(path.join(process.cwd(), "uploads", folder, fileName), file.buffer)
+  return relativePath
+}
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -126,6 +154,94 @@ const homeContentSchema = z.object({
     .optional()
     .default([]),
 })
+
+const blogPayloadSchema = z.object({
+  title: z.string().min(2).max(180),
+  slug: z.string().min(2).max(200).optional().or(z.literal("")),
+  content: z.string().min(20),
+  excerpt: z.string().max(420).optional().or(z.literal("")),
+  featuredImage: z.string().max(1000).optional().or(z.literal("")),
+  author: z.string().min(2).max(120),
+  category: z.string().max(120).optional().or(z.literal("")),
+  tags: z.array(z.string().min(1).max(60)).optional().default([]),
+  status: z.enum(["draft", "published"]).optional().default("draft"),
+  seoTitle: z.string().max(180).optional().or(z.literal("")),
+  seoDescription: z.string().max(320).optional().or(z.literal("")),
+  publishedAt: z.union([z.string(), z.date()]).optional().nullable(),
+})
+
+async function uploadImageAsset(file, folder) {
+  if (hasCloudinaryConfig()) {
+    try {
+      const result = await uploadToCloudinary(file, folder)
+      return result.secure_url
+    } catch (error) {
+      console.warn(
+        `Cloudinary upload failed for ${folder}, falling back to local storage.`,
+        error.message
+      )
+    }
+  }
+  return saveLocally(file, folder)
+}
+
+async function ensureUniqueSlug(slug, currentId = null) {
+  const existing = await BlogPost.findOne({
+    slug,
+    ...(currentId ? { _id: { $ne: currentId } } : {}),
+  })
+  if (existing) {
+    const error = new Error("A blog post with this slug already exists")
+    error.status = 409
+    throw error
+  }
+}
+
+function normalizePublishedAt(status, publishedAt, existingPublishedAt = null) {
+  if (status === "draft") {
+    return null
+  }
+  if (publishedAt) {
+    return new Date(publishedAt)
+  }
+  return existingPublishedAt || new Date()
+}
+
+function buildBlogDocument(payload, existing = null) {
+  const sanitizedContent = sanitizeBlogHtml(payload.content)
+  const slug = slugifyBlogTitle(payload.slug || payload.title)
+  const excerpt = buildExcerpt(sanitizedContent, payload.excerpt || "")
+  const tags = [...new Set((payload.tags || []).map((tag) => tag.trim()).filter(Boolean))]
+  const status = payload.status || "draft"
+  const publishedAt = normalizePublishedAt(
+    status,
+    payload.publishedAt,
+    existing?.publishedAt || null
+  )
+
+  return {
+    title: payload.title.trim(),
+    slug,
+    content: sanitizedContent,
+    excerpt,
+    featuredImage: (payload.featuredImage || "").trim(),
+    author: payload.author.trim(),
+    category: (payload.category || "").trim(),
+    tags,
+    status,
+    seoTitle: (payload.seoTitle || payload.title).trim(),
+    seoDescription: (payload.seoDescription || excerpt).trim(),
+    readTime: calculateReadTime(sanitizedContent),
+    publishedAt,
+  }
+}
+
+function shapeBlogResponse(post) {
+  return {
+    ...post.toObject(),
+    meta: buildBlogMeta(post),
+  }
+}
 
 router.post("/admin/login", async (req, res, next) => {
   try {
@@ -640,14 +756,11 @@ router.post(
   upload.single("image"),
   async (req, res, next) => {
     try {
-      if (!process.env.CLOUDINARY_CLOUD_NAME) {
-        return res.status(500).json({ message: "Cloudinary not configured" })
-      }
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
-      const result = await uploadToCloudinary(req.file, "team")
-      res.json({ imageUrl: result.secure_url })
+      const imageUrl = await uploadImageAsset(req.file, "team")
+      res.json({ imageUrl })
     } catch (error) {
       console.error("Team upload error:", error)
       next(error)
@@ -661,16 +774,146 @@ router.post(
   upload.single("image"),
   async (req, res, next) => {
     try {
-      if (!process.env.CLOUDINARY_CLOUD_NAME) {
-        return res.status(500).json({ message: "Cloudinary not configured" })
-      }
       if (!req.file) {
         return res.status(400).json({ message: "No image uploaded" })
       }
-      const result = await uploadToCloudinary(req.file, "media")
-      res.json({ imageUrl: result.secure_url })
+      const imageUrl = await uploadImageAsset(req.file, "media")
+      res.json({ imageUrl })
     } catch (error) {
       console.error("Media upload error:", error)
+      next(error)
+    }
+  }
+)
+
+router.get("/admin/blog", requireAuth, async (req, res, next) => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1)
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10))
+    const search = (req.query.search || "").trim()
+    const status = (req.query.status || "").trim()
+    const sort = req.query.sort === "oldest" ? 1 : -1
+
+    const filter = {}
+    if (status === "draft" || status === "published") {
+      filter.status = status
+    }
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { excerpt: { $regex: search, $options: "i" } },
+        { author: { $regex: search, $options: "i" } },
+        { tags: { $regex: search, $options: "i" } },
+      ]
+    }
+
+    const [items, total] = await Promise.all([
+      BlogPost.find(filter)
+        .sort({ publishedAt: sort, createdAt: sort })
+        .skip((page - 1) * limit)
+        .limit(limit),
+      BlogPost.countDocuments(filter),
+    ])
+
+    res.json({
+      items: items.map(shapeBlogResponse),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/admin/blog/:id", requireAuth, async (req, res, next) => {
+  try {
+    const post = await BlogPost.findById(req.params.id)
+    if (!post) {
+      return res.status(404).json({ message: "Not found" })
+    }
+    res.json(shapeBlogResponse(post))
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post("/blog", requireAuth, async (req, res, next) => {
+  try {
+    const payload = blogPayloadSchema.parse(req.body)
+    const document = buildBlogDocument(payload)
+    if (!document.slug) {
+      return res.status(400).json({ message: "Slug is required" })
+    }
+    await ensureUniqueSlug(document.slug)
+    const created = await BlogPost.create(document)
+    res.status(201).json(shapeBlogResponse(created))
+  } catch (error) {
+    if (error?.issues) {
+      return res.status(400).json({ message: "Invalid blog input" })
+    }
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "A blog post with this slug already exists" })
+    }
+    next(error)
+  }
+})
+
+router.put("/blog/:id", requireAuth, async (req, res, next) => {
+  try {
+    const payload = blogPayloadSchema.parse(req.body)
+    const existing = await BlogPost.findById(req.params.id)
+    if (!existing) {
+      return res.status(404).json({ message: "Not found" })
+    }
+
+    const document = buildBlogDocument(payload, existing)
+    if (!document.slug) {
+      return res.status(400).json({ message: "Slug is required" })
+    }
+    await ensureUniqueSlug(document.slug, existing._id)
+
+    Object.assign(existing, document)
+    await existing.save()
+    res.json(shapeBlogResponse(existing))
+  } catch (error) {
+    if (error?.issues) {
+      return res.status(400).json({ message: "Invalid blog input" })
+    }
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "A blog post with this slug already exists" })
+    }
+    next(error)
+  }
+})
+
+router.delete("/blog/:id", requireAuth, async (req, res, next) => {
+  try {
+    const post = await BlogPost.findByIdAndDelete(req.params.id)
+    if (!post) {
+      return res.status(404).json({ message: "Not found" })
+    }
+    res.status(204).send()
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post(
+  "/blog/upload",
+  requireAuth,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image uploaded" })
+      }
+      const imageUrl = await uploadImageAsset(req.file, "blog")
+      res.json({ imageUrl })
+    } catch (error) {
       next(error)
     }
   }
