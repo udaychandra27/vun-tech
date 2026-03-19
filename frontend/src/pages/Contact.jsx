@@ -70,15 +70,28 @@ export function Contact() {
   }
 
   const validate = () => {
+    const trimmed = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      message: form.message.trim(),
+      humanCheck: form.humanCheck.trim(),
+    }
     const nextErrors = {}
-    if (!form.name.trim()) nextErrors.name = "Name is required."
-    if (!form.email.trim()) nextErrors.email = "Email is required."
-    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) {
+    if (!trimmed.name) nextErrors.name = "Name is required."
+    if (!trimmed.email) nextErrors.email = "Email is required."
+    if (trimmed.email && !/^\S+@\S+\.\S+$/.test(trimmed.email)) {
       nextErrors.email = "Enter a valid email."
     }
-    if (!form.phone.trim()) nextErrors.phone = "Contact number is required."
-    if (!form.message.trim()) nextErrors.message = "Message is required."
-    if (form.humanCheck.trim() !== "7") {
+    if (!trimmed.phone) nextErrors.phone = "Contact number is required."
+    if (trimmed.phone && trimmed.phone.length < 7) {
+      nextErrors.phone = "Enter a valid contact number."
+    }
+    if (!trimmed.message) nextErrors.message = "Message is required."
+    if (trimmed.message && trimmed.message.length < 10) {
+      nextErrors.message = "Please share a few project details."
+    }
+    if (trimmed.humanCheck !== "7") {
       nextErrors.humanCheck = "Please answer the spam check."
     }
     return nextErrors
@@ -102,16 +115,16 @@ export function Contact() {
       await apiFetch("/api/contact", {
         method: "POST",
         body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          company: form.company,
-          message: form.message,
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          company: form.company.trim(),
+          message: form.message.trim(),
         }),
       })
       setStatus({
         type: "success",
-        message: "Thanks. We will respond within two business days.",
+        message: "Thanks. We have received your enquiry and sent a confirmation email.",
       })
       setForm(initialForm)
     } catch (error) {
@@ -296,4 +309,3 @@ export function Contact() {
     </div>
   )
 }
-

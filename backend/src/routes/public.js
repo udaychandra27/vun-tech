@@ -13,6 +13,7 @@ import { BlogPost } from "../models/BlogPost.js"
 import { buildBlogMeta } from "../utils/blog.js"
 import Razorpay from "razorpay"
 import crypto from "crypto"
+import nodemailer from "nodemailer"
 
 dotenv.config()
 
@@ -26,13 +27,94 @@ const razorpay =
       })
     : null
 
+const mailTransporter =
+  process.env.SMTP_HOST &&
+  process.env.SMTP_PORT &&
+  process.env.SMTP_USER &&
+  process.env.SMTP_PASS
+    ? nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        secure: String(process.env.SMTP_SECURE || "false") === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      })
+    : null
+
+const adminInbox = process.env.MAIL_TO || process.env.SMTP_USER || ""
+const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || ""
+
 const contactSchema = z.object({
-  name: z.string().min(2).max(120),
-  email: z.string().email(),
-  phone: z.string().min(7).max(20),
-  company: z.string().max(120).optional().or(z.literal("")),
-  message: z.string().min(10).max(2000),
+  name: z.string().trim().min(2, "Please enter your name").max(120),
+  email: z.string().trim().email("Please enter a valid email address"),
+  phone: z.string().trim().min(7, "Please enter a valid phone number").max(30),
+  company: z.string().trim().max(120).optional().or(z.literal("")),
+  message: z.string().trim().min(10, "Please share a few project details").max(2000),
 })
+
+async function sendContactEmails(payload) {
+  if (!mailTransporter || !adminInbox || !mailFrom) {
+    return
+  }
+
+  const subjectLine = `New project enquiry from ${payload.name}`
+
+  await Promise.allSettled([
+    mailTransporter.sendMail({
+      from: mailFrom,
+      to: adminInbox,
+      replyTo: payload.email,
+      subject: subjectLine,
+      text: [
+        "A new project enquiry was submitted.",
+        "",
+        `Name: ${payload.name}`,
+        `Email: ${payload.email}`,
+        `Phone: ${payload.phone}`,
+        `Company: ${payload.company || "Not provided"}`,
+        "",
+        "Message:",
+        payload.message,
+      ].join("\n"),
+    }),
+    mailTransporter.sendMail({
+      from: mailFrom,
+      to: payload.email,
+      subject: "Thanks for contacting VUN Tech",
+      text: [
+        `Hi ${payload.name},`,
+        "",
+        "Thanks for reaching out to VUN Tech. We have received your project enquiry and our team will review it shortly.",
+        "",
+        "Here is a quick summary of what you sent:",
+        `Project details: ${payload.message}`,
+        `Phone: ${payload.phone}`,
+        "",
+        "We usually reply with next steps, scope questions, or a timeline update within two business days.",
+        "",
+        "Best regards,",
+        "VUN Tech",
+      ].join("\n"),
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+          <p>Hi ${payload.name},</p>
+          <p>Thanks for reaching out to <strong>VUN Tech</strong>. We have received your project enquiry and our team will review it shortly.</p>
+          <p>Here is a quick summary of what you sent:</p>
+          <ul>
+            <li><strong>Phone:</strong> ${payload.phone}</li>
+            <li><strong>Company:</strong> ${payload.company || "Not provided"}</li>
+          </ul>
+          <p><strong>Project details:</strong></p>
+          <p>${payload.message.replace(/\n/g, "<br />")}</p>
+          <p>We usually reply with next steps, scope questions, or a timeline update within two business days.</p>
+          <p>Best regards,<br />VUN Tech</p>
+        </div>
+      `,
+    }),
+  ])
+}
 
 router.post("/contact", async (req, res, next) => {
   try {
@@ -44,11 +126,12 @@ router.post("/contact", async (req, res, next) => {
       company: payload.company || "",
       message: payload.message,
     })
+    await sendContactEmails(payload)
     res.status(201).json({ id: contact._id })
   } catch (error) {
     console.error("Contact error:", error)
     if (error?.issues) {
-      return res.status(400).json({ message: "Invalid input" })
+      return res.status(400).json({ message: error.issues[0]?.message || "Invalid input" })
     }
     return res.status(500).json({ message: "Contact submission failed" })
   }
