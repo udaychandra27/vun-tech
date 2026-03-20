@@ -44,7 +44,7 @@ const AdminBlogEditor = lazy(() =>
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen flex-col bg-sand">
+      <div className="flex min-h-screen flex-col bg-white">
         <SiteHeader />
         <main className="flex-1">
           <Suspense fallback={<div className="px-6 py-10 text-sm text-slate">Loading...</div>}>

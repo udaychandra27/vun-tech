@@ -105,36 +105,40 @@ export function About() {
   }, [])
 
   return (
-    <div className="bg-sand">
-      <section className="relative border-b border-fog bg-sand bg-grid">
+    <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_55%,#ffffff_100%)]">
+      <section className="relative border-b border-fog bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] bg-grid">
         <GradientOrbs />
-        <Container className="py-14">
+        <Container className="py-16">
           <SectionBadge>About</SectionBadge>
-          <h1 className="text-4xl font-semibold">{content.heroTitle}</h1>
-          <p className="mt-4 max-w-2xl text-lg text-slate">
+          <h1 className="mt-5 text-[40px] font-semibold tracking-[-0.04em] text-ink md:text-[56px]">
+            {content.heroTitle}
+          </h1>
+          <p className="mt-5 max-w-3xl text-[17px] leading-8 text-slate">
             {content.heroSubtitle}
           </p>
         </Container>
       </section>
 
       <section>
-        <Container className="py-12">
-          <div className="mb-10 rounded-3xl border border-fog bg-white/70 p-8 shadow-sm">
+        <Container className="py-14">
+          <div className="mb-10 rounded-[24px] border border-[#dbeafe] bg-white/90 p-8 shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
             <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-center">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink/60">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#64748b]">
                   Why teams choose us
                 </div>
-                <h2 className="mt-3 text-3xl font-semibold text-ink">
+                <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.03em] text-ink">
                   {content.highlightTitle}
                 </h2>
-                <p className="mt-3 text-slate">{content.highlightSubtitle}</p>
+                <p className="mt-4 text-[15px] leading-7 text-slate">
+                  {content.highlightSubtitle}
+                </p>
               </div>
               <div className="grid gap-3">
                 {content.highlightPoints.map((point) => (
                   <div
                     key={point}
-                    className="rounded-2xl border border-fog bg-sand px-4 py-3 text-sm text-ink"
+                    className="rounded-[16px] border border-[#bfdbfe] bg-[#f8fbff] px-4 py-4 text-[14px] text-ink"
                   >
                     {point}
                   </div>
@@ -144,24 +148,27 @@ export function About() {
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {content.approach.map((step) => (
-              <Card key={step.title}>
+              <Card
+                key={step.title}
+                className="rounded-[18px] border-[#dbeafe] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.04)]"
+              >
                 <CardHeader>
-                  <CardTitle>{step.title}</CardTitle>
+                  <CardTitle className="text-[24px]">{step.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-slate">
+                <CardContent className="text-[14px] leading-7 text-slate">
                   {step.description}
                 </CardContent>
               </Card>
             ))}
           </div>
           <div className="mt-10">
-            <h2 className="text-2xl font-semibold">Team</h2>
-            <p className="mt-2 text-sm text-slate">
+            <h2 className="text-[30px] font-semibold tracking-[-0.03em]">Team</h2>
+            <p className="mt-2 text-[15px] text-slate">
               A small, senior team focused on clarity and delivery.
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {content.team.map((member) => (
-                <Card key={member.name} className="team-card glass-card">
+                <Card key={member.name} className="team-card glass-card border-[#dbeafe] bg-white">
                   <CardHeader className="items-center pt-8 text-center">
                     <div className="team-avatar">
                       <span className="team-initials">
@@ -189,15 +196,15 @@ export function About() {
                         />
                       ) : null}
                     </div>
-                    <CardTitle className="mt-5 text-xl font-semibold text-[#3b1d79]">
+                    <CardTitle className="mt-5 text-[24px] font-semibold text-[#0f172a]">
                       {member.name}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 pb-8 text-center text-sm text-slate">
+                  <CardContent className="pt-0 pb-8 text-center text-[14px] text-slate">
                     <div className="font-medium text-slate-500">{member.role}</div>
                     {member.linkedinUrl && (
                       <a
-                        className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#0a66c2]"
+                        className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#2563eb]"
                         href={member.linkedinUrl}
                         target="_blank"
                         rel="noreferrer"
@@ -211,7 +218,7 @@ export function About() {
               ))}
             </div>
           </div>
-          <div className="mt-10 rounded-xl border border-fog bg-white p-6 text-sm text-slate">
+          <div className="mt-10 rounded-[18px] border border-[#dbeafe] bg-white p-6 text-[15px] leading-7 text-slate shadow-[0_12px_34px_rgba(15,23,42,0.04)]">
             {content.closingNote}
           </div>
         </Container>

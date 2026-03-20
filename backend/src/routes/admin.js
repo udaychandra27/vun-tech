@@ -90,6 +90,21 @@ const serviceSchema = z.object({
   visible: z.boolean().optional().default(true),
   featured: z.boolean().optional().default(false),
   categoryId: z.string().optional().or(z.literal("")),
+  icon: z.string().max(80).optional().or(z.literal("")),
+  theme: z.enum(["blue", "blue-featured", "teal", "amber"]).optional().default("blue"),
+  eyebrow: z.string().max(120).optional().or(z.literal("")),
+  badgeLabel: z.string().max(40).optional().or(z.literal("")),
+  tags: z.array(z.string().min(1).max(40)).optional().default([]),
+  detailTabs: z
+    .array(
+      z.object({
+        title: z.string().min(2).max(80),
+        items: z.array(z.string().min(2).max(180)).min(1).max(6),
+      })
+    )
+    .max(3)
+    .optional()
+    .default([]),
 })
 
 const projectSchema = z.object({
@@ -97,7 +112,17 @@ const projectSchema = z.object({
   description: z.string().min(10).max(1000),
   link: z.string().url().optional().or(z.literal("")),
   industry: z.string().max(120).optional().or(z.literal("")),
+  domain: z.string().max(120).optional().or(z.literal("")),
+  badgeLabel: z.string().max(40).optional().or(z.literal("")),
+  accent: z
+    .enum(["blue", "green", "amber", "purple", "pink"])
+    .optional()
+    .default("blue"),
+  icon: z.string().max(80).optional().or(z.literal("")),
+  summary: z.string().max(320).optional().or(z.literal("")),
+  includes: z.array(z.string().min(2).max(140)).optional().default([]),
   outcome: z.string().max(240).optional().or(z.literal("")),
+  idealFor: z.string().max(220).optional().or(z.literal("")),
   stack: z.array(z.string().min(2).max(80)).optional().default([]),
   featured: z.boolean().optional().default(false),
 })
@@ -136,14 +161,57 @@ const aboutContentSchema = z.object({
 const contactContentSchema = z.object({
   heroTitle: z.string().min(2).max(140),
   heroSubtitle: z.string().min(10).max(600),
+  trustPoints: z.array(z.string().min(2).max(120)).optional().default([]),
+  formTitle: z.string().max(120).optional().or(z.literal("")),
+  formStatusLabel: z.string().max(80).optional().or(z.literal("")),
+  serviceFieldLabel: z.string().max(80).optional().or(z.literal("")),
+  directTitle: z.string().max(120).optional().or(z.literal("")),
   email: z.string().email().optional().or(z.literal("")),
   whatsappUrl: z.string().max(500).optional().or(z.literal("")),
+  linkedinUrl: z.string().max(500).optional().or(z.literal("")),
+  linkedinLabel: z.string().max(120).optional().or(z.literal("")),
   locationText: z.string().max(200).optional().or(z.literal("")),
+  nextStepsTitle: z.string().max(120).optional().or(z.literal("")),
   nextSteps: z.array(z.string().min(2).max(140)).optional().default([]),
+  requirementsTitle: z.string().max(120).optional().or(z.literal("")),
   requirements: z.array(z.string().min(2).max(140)).optional().default([]),
+  attachmentHint: z.string().max(200).optional().or(z.literal("")),
+  linkFieldLabel: z.string().max(120).optional().or(z.literal("")),
 })
 
 const homeContentSchema = z.object({
+  hero_title: z.string().max(180).optional().or(z.literal("")),
+  hero_subtitle: z.string().max(220).optional().or(z.literal("")),
+  hero_description: z.string().max(500).optional().or(z.literal("")),
+  hero_primary_button_text: z.string().max(80).optional().or(z.literal("")),
+  hero_primary_button_link: z.string().max(500).optional().or(z.literal("")),
+  hero_secondary_button_text: z.string().max(80).optional().or(z.literal("")),
+  hero_secondary_button_link: z.string().max(500).optional().or(z.literal("")),
+  brand_accent_color: z
+    .string()
+    .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/)
+    .optional()
+    .or(z.literal("")),
+  trusted_badges: z.array(z.string().max(80)).optional().default([]),
+  why_choose_items: z
+    .array(
+      z.object({
+        icon: z.string().max(80).optional().or(z.literal("")),
+        title: z.string().max(120).optional().or(z.literal("")),
+        description: z.string().max(240).optional().or(z.literal("")),
+      })
+    )
+    .optional()
+    .default([]),
+  stats: z
+    .array(
+      z.object({
+        value: z.string().max(80).optional().or(z.literal("")),
+        label: z.string().max(120).optional().or(z.literal("")),
+      })
+    )
+    .optional()
+    .default([]),
   heroCards: z
     .array(
       z.object({
@@ -153,6 +221,31 @@ const homeContentSchema = z.object({
     )
     .optional()
     .default([]),
+  trustLabel: z.string().max(200).optional().or(z.literal("")),
+  trustLogos: z.array(z.string().max(120)).optional().default([]),
+  showTestimonials: z.boolean().optional().default(true),
+  testimonials: z
+    .array(
+      z.object({
+        quote: z.string().max(320).optional().or(z.literal("")),
+        name: z.string().max(120).optional().or(z.literal("")),
+        role: z.string().max(160).optional().or(z.literal("")),
+      })
+    )
+    .optional()
+    .default([]),
+})
+
+const workContentSchema = z.object({
+  heroTitle: z.string().min(2).max(160),
+  heroSubtitle: z.string().min(10).max(700),
+  allProjectsLabel: z.string().max(80).optional().or(z.literal("")),
+  ctaTitle: z.string().max(160).optional().or(z.literal("")),
+  ctaSubtitle: z.string().max(320).optional().or(z.literal("")),
+  primaryCtaLabel: z.string().max(80).optional().or(z.literal("")),
+  primaryCtaUrl: z.string().max(500).optional().or(z.literal("")),
+  secondaryCtaLabel: z.string().max(80).optional().or(z.literal("")),
+  secondaryCtaUrl: z.string().max(500).optional().or(z.literal("")),
 })
 
 const blogPayloadSchema = z.object({
@@ -491,8 +584,15 @@ router.post("/admin/services", requireAuth, async (req, res, next) => {
       visible: payload.visible ?? true,
       featured: payload.featured ?? false,
       categoryId: payload.categoryId || null,
+      icon: payload.icon || "",
+      theme: payload.theme || "blue",
+      eyebrow: payload.eyebrow || "",
+      badgeLabel: payload.badgeLabel || "",
+      tags: payload.tags || [],
+      detailTabs: payload.detailTabs || [],
     })
-    res.status(201).json(service)
+    const populatedService = await Service.findById(service._id).populate("categoryId")
+    res.status(201).json(populatedService)
   } catch (error) {
     if (error?.issues) {
       return res.status(400).json({ message: "Invalid input" })
@@ -514,13 +614,20 @@ router.put("/admin/services/:id", requireAuth, async (req, res, next) => {
         visible: payload.visible ?? true,
         featured: payload.featured ?? false,
         categoryId: payload.categoryId || null,
+        icon: payload.icon || "",
+        theme: payload.theme || "blue",
+        eyebrow: payload.eyebrow || "",
+        badgeLabel: payload.badgeLabel || "",
+        tags: payload.tags || [],
+        detailTabs: payload.detailTabs || [],
       },
       { new: true }
     )
     if (!service) {
       return res.status(404).json({ message: "Not found" })
     }
-    res.json(service)
+    const populatedService = await Service.findById(service._id).populate("categoryId")
+    res.json(populatedService)
   } catch (error) {
     if (error?.issues) {
       return res.status(400).json({ message: "Invalid input" })
@@ -599,7 +706,14 @@ router.post("/admin/projects", requireAuth, async (req, res, next) => {
       description: payload.description,
       link: payload.link || "",
       industry: payload.industry || "",
+      domain: payload.domain || "",
+      badgeLabel: payload.badgeLabel || "",
+      accent: payload.accent || "blue",
+      icon: payload.icon || "",
+      summary: payload.summary || "",
+      includes: payload.includes || [],
       outcome: payload.outcome || "",
+      idealFor: payload.idealFor || "",
       stack: payload.stack || [],
       featured: payload.featured ?? false,
     })
@@ -622,7 +736,14 @@ router.put("/admin/projects/:id", requireAuth, async (req, res, next) => {
         description: payload.description,
         link: payload.link || "",
         industry: payload.industry || "",
+        domain: payload.domain || "",
+        badgeLabel: payload.badgeLabel || "",
+        accent: payload.accent || "blue",
+        icon: payload.icon || "",
+        summary: payload.summary || "",
+        includes: payload.includes || [],
         outcome: payload.outcome || "",
+        idealFor: payload.idealFor || "",
         stack: payload.stack || [],
         featured: payload.featured ?? false,
       },
@@ -736,9 +857,38 @@ router.put("/admin/content/home", requireAuth, async (req, res, next) => {
     ) {
       mergedPayload.heroCards = existing.home.heroCards
     }
+    if (
+      (!payload.trustLogos || payload.trustLogos.length === 0) &&
+      existing?.home?.trustLogos?.length
+    ) {
+      mergedPayload.trustLogos = existing.home.trustLogos
+    }
+    if (
+      (!payload.testimonials || payload.testimonials.length === 0) &&
+      existing?.home?.testimonials?.length
+    ) {
+      mergedPayload.testimonials = existing.home.testimonials
+    }
     const content = await SiteContent.findOneAndUpdate(
       { key: "default" },
       { $set: { home: mergedPayload } },
+      { new: true, upsert: true }
+    )
+    res.json(content)
+  } catch (error) {
+    if (error?.issues) {
+      return res.status(400).json({ message: "Invalid input" })
+    }
+    next(error)
+  }
+})
+
+router.put("/admin/content/work", requireAuth, async (req, res, next) => {
+  try {
+    const payload = workContentSchema.parse(req.body)
+    const content = await SiteContent.findOneAndUpdate(
+      { key: "default" },
+      { $set: { work: payload } },
       { new: true, upsert: true }
     )
     res.json(content)

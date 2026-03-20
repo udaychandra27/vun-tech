@@ -6,7 +6,7 @@ export default {
       colors: {
         ink: "#0e151b",
         slate: "#4b5563",
-        sand: "#f5f3ef",
+        sand: "#f8fafc",
         moss: "#2563eb",
         fog: "#e5e7eb",
         sky: "#38bdf8",

@@ -17,10 +17,137 @@ const tabs = [
   "orders",
   "trending",
   "services",
-  "categories",
   "work",
   "pages",
 ]
+
+const serviceIconOptions = [
+  "Monitor",
+  "ShieldCheck",
+  "PenTool",
+  "Cloud",
+  "Code2",
+  "Workflow",
+  "Sparkles",
+  "BadgeCheck",
+  "Lock",
+  "ScanSearch",
+  "LayoutPanelTop",
+  "ServerCog",
+  "Globe",
+]
+
+const projectIconOptions = [
+  "Monitor",
+  "ShieldCheck",
+  "PenTool",
+  "Cloud",
+  "Code2",
+  "Workflow",
+  "Sparkles",
+  "Lock",
+  "ScanSearch",
+  "LayoutPanelTop",
+  "ServerCog",
+  "Globe",
+]
+
+const pageEditorSections = [
+  { id: "about", label: "About" },
+  { id: "contact", label: "Contact" },
+  { id: "work", label: "Work" },
+  { id: "home", label: "Home" },
+]
+
+const serviceDetailSections = ["Included", "Process", "Deliverables"]
+
+const emptyServiceTabs = serviceDetailSections.map((title) => ({
+  title,
+  itemsText: "",
+}))
+
+const defaultHomeHeroCards = [
+  { imageUrl: "", caption: "" },
+  { imageUrl: "", caption: "" },
+]
+
+const defaultWhyChooseItems = [
+  {
+    icon: "Workflow",
+    title: "Fast Delivery",
+    description: "Rapid development cycles without compromising quality",
+  },
+  {
+    icon: "Sparkles",
+    title: "Startup-Friendly Pricing",
+    description: "Affordable solutions designed for growing businesses",
+  },
+  {
+    icon: "Code2",
+    title: "Modern Tech Stack",
+    description: "Built using latest secure and scalable technologies",
+  },
+  {
+    icon: "BadgeCheck",
+    title: "Direct Expert Support",
+    description: "Work directly with developers, not middlemen",
+  },
+  {
+    icon: "ShieldCheck",
+    title: "Secure by Design",
+    description: "Security integrated from day one",
+  },
+]
+
+const defaultHomeStats = [
+  { value: "20+", label: "Projects Delivered" },
+  { value: "10+", label: "Technologies Used" },
+  { value: "24/7", label: "Support" },
+  { value: "Startup-Friendly", label: "Pricing" },
+]
+
+const emptyHomeTestimonial = { quote: "", name: "", role: "" }
+
+const defaultHomeTestimonials = [
+  emptyHomeTestimonial,
+  emptyHomeTestimonial,
+  emptyHomeTestimonial,
+]
+
+function buildHomeLogoSlots(items = [], count = 4) {
+  return Array.from({ length: count }, (_, index) => items[index] || "")
+}
+
+function buildWhyChooseSlots(items = [], count = defaultWhyChooseItems.length) {
+  return Array.from(
+    { length: count },
+    (_, index) => items[index] || { ...defaultWhyChooseItems[index] }
+  )
+}
+
+function buildHomeStatSlots(items = [], count = defaultHomeStats.length) {
+  return Array.from(
+    { length: count },
+    (_, index) => items[index] || { ...defaultHomeStats[index] }
+  )
+}
+
+function buildHomeTestimonialSlots(items = [], count = 3) {
+  return Array.from(
+    { length: count },
+    (_, index) => items[index] || { ...defaultHomeTestimonials[index] }
+  )
+}
+
+function buildServiceTabsForm(detailTabs = []) {
+  return emptyServiceTabs.map((fallback, index) => {
+    const tab = detailTabs[index]
+    return {
+      title: fallback.title,
+      itemsText: Array.isArray(tab?.items) ? tab.items.join("\n") : "",
+    }
+  })
+}
 
 export function AdminDashboard() {
   const navigate = useNavigate()
@@ -30,7 +157,6 @@ export function AdminDashboard() {
   const [orders, setOrders] = useState([])
   const [trending, setTrending] = useState([])
   const [services, setServices] = useState([])
-  const [categories, setCategories] = useState([])
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -41,9 +167,14 @@ export function AdminDashboard() {
     description: "",
     includes: "",
     idealFor: "",
+    eyebrow: "",
+    badgeLabel: "",
+    icon: "Monitor",
+    theme: "blue",
+    tags: "",
+    detailTabs: buildServiceTabsForm(),
     visible: true,
     featured: false,
-    categoryId: "",
   })
 
   const [projectForm, setProjectForm] = useState({
@@ -52,7 +183,14 @@ export function AdminDashboard() {
     description: "",
     link: "",
     industry: "",
+    domain: "",
+    badgeLabel: "",
+    accent: "blue",
+    icon: "Monitor",
+    summary: "",
+    includes: "",
     outcome: "",
+    idealFor: "",
     stack: "",
     featured: false,
   })
@@ -71,19 +209,53 @@ export function AdminDashboard() {
   const [contactForm, setContactForm] = useState({
     heroTitle: "",
     heroSubtitle: "",
+    trustPointsText: "",
+    formTitle: "",
+    formStatusLabel: "",
+    serviceFieldLabel: "",
+    directTitle: "",
     email: "",
     whatsappUrl: "",
-    locationText: "",
+    linkedinUrl: "",
+    linkedinLabel: "",
+    nextStepsTitle: "",
     nextStepsText: "",
+    requirementsTitle: "",
     requirementsText: "",
+    attachmentHint: "",
+    linkFieldLabel: "",
   })
 
   const [homeForm, setHomeForm] = useState({
-    heroCards: [
-      { imageUrl: "", caption: "" },
-      { imageUrl: "", caption: "" },
-    ],
+    hero_title: "",
+    hero_subtitle: "",
+    hero_description: "",
+    hero_primary_button_text: "",
+    hero_primary_button_link: "",
+    hero_secondary_button_text: "",
+    hero_secondary_button_link: "",
+    brand_accent_color: "#2F6BFF",
+    trusted_badges: buildHomeLogoSlots([], 5),
+    why_choose_items: buildWhyChooseSlots(),
+    stats: buildHomeStatSlots(),
+    heroCards: defaultHomeHeroCards,
+    trustLabel: "",
+    trustLogos: buildHomeLogoSlots(),
+    showTestimonials: true,
+    testimonials: buildHomeTestimonialSlots(),
   })
+  const [workForm, setWorkForm] = useState({
+    heroTitle: "",
+    heroSubtitle: "",
+    allProjectsLabel: "",
+    ctaTitle: "",
+    ctaSubtitle: "",
+    primaryCtaLabel: "",
+    primaryCtaUrl: "",
+    secondaryCtaLabel: "",
+    secondaryCtaUrl: "",
+  })
+  const [activePageEditor, setActivePageEditor] = useState("about")
 
   const [teamMembers, setTeamMembers] = useState([])
   const [teamForm, setTeamForm] = useState({
@@ -101,12 +273,6 @@ export function AdminDashboard() {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedPixels, setCroppedPixels] = useState(null)
-
-  const [categoryForm, setCategoryForm] = useState({
-    id: null,
-    title: "",
-    items: "",
-  })
 
   const [trendingForm, setTrendingForm] = useState({
     id: null,
@@ -128,7 +294,6 @@ export function AdminDashboard() {
         ordersData,
         trendingData,
         servicesData,
-        categoriesData,
         projectsData,
         contentData,
       ] =
@@ -138,7 +303,6 @@ export function AdminDashboard() {
           apiFetch("/api/admin/orders"),
           apiFetch("/api/admin/trending"),
           apiFetch("/api/admin/services"),
-          apiFetch("/api/admin/categories"),
           apiFetch("/api/admin/projects"),
           apiFetch("/api/admin/content"),
         ])
@@ -147,7 +311,6 @@ export function AdminDashboard() {
       setOrders(ordersData)
       setTrending(trendingData)
       setServices(servicesData)
-      setCategories(categoriesData)
       setProjects(projectsData)
       if (contentData?.about) {
         setAboutForm({
@@ -168,25 +331,66 @@ export function AdminDashboard() {
         setContactForm({
           heroTitle: contentData.contact.heroTitle || "",
           heroSubtitle: contentData.contact.heroSubtitle || "",
+          trustPointsText: (contentData.contact.trustPoints || []).join("\n"),
+          formTitle: contentData.contact.formTitle || "",
+          formStatusLabel: contentData.contact.formStatusLabel || "",
+          serviceFieldLabel: contentData.contact.serviceFieldLabel || "",
+          directTitle: contentData.contact.directTitle || "",
           email: contentData.contact.email || "",
           whatsappUrl: contentData.contact.whatsappUrl || "",
-          locationText: contentData.contact.locationText || "",
+          linkedinUrl: contentData.contact.linkedinUrl || "",
+          linkedinLabel: contentData.contact.linkedinLabel || "",
+          nextStepsTitle: contentData.contact.nextStepsTitle || "",
           nextStepsText: (contentData.contact.nextSteps || []).join("\n"),
+          requirementsTitle: contentData.contact.requirementsTitle || "",
           requirementsText: (contentData.contact.requirements || []).join("\n"),
+          attachmentHint: contentData.contact.attachmentHint || "",
+          linkFieldLabel: contentData.contact.linkFieldLabel || "",
         })
       }
       if (contentData?.home) {
         const heroCards = Array.isArray(contentData.home.heroCards)
           ? contentData.home.heroCards
           : []
+        const trustLogos = Array.isArray(contentData.home.trustLogos)
+          ? contentData.home.trustLogos
+          : []
+        const testimonials = Array.isArray(contentData.home.testimonials)
+          ? contentData.home.testimonials
+          : []
         setHomeForm({
+          hero_title: contentData.home.hero_title || "",
+          hero_subtitle: contentData.home.hero_subtitle || "",
+          hero_description: contentData.home.hero_description || "",
+          hero_primary_button_text: contentData.home.hero_primary_button_text || "",
+          hero_primary_button_link: contentData.home.hero_primary_button_link || "",
+          hero_secondary_button_text: contentData.home.hero_secondary_button_text || "",
+          hero_secondary_button_link: contentData.home.hero_secondary_button_link || "",
+          brand_accent_color: contentData.home.brand_accent_color || "#2F6BFF",
+          trusted_badges: buildHomeLogoSlots(contentData.home.trusted_badges || [], 5),
+          why_choose_items: buildWhyChooseSlots(contentData.home.why_choose_items || []),
+          stats: buildHomeStatSlots(contentData.home.stats || []),
           heroCards:
             heroCards.length > 0
               ? heroCards
-              : [
-                  { imageUrl: "", caption: "" },
-                  { imageUrl: "", caption: "" },
-                ],
+              : defaultHomeHeroCards,
+          trustLabel: contentData.home.trustLabel || "",
+          trustLogos: buildHomeLogoSlots(trustLogos),
+          showTestimonials: contentData.home.showTestimonials ?? true,
+          testimonials: buildHomeTestimonialSlots(testimonials),
+        })
+      }
+      if (contentData?.work) {
+        setWorkForm({
+          heroTitle: contentData.work.heroTitle || "",
+          heroSubtitle: contentData.work.heroSubtitle || "",
+          allProjectsLabel: contentData.work.allProjectsLabel || "",
+          ctaTitle: contentData.work.ctaTitle || "",
+          ctaSubtitle: contentData.work.ctaSubtitle || "",
+          primaryCtaLabel: contentData.work.primaryCtaLabel || "",
+          primaryCtaUrl: contentData.work.primaryCtaUrl || "",
+          secondaryCtaLabel: contentData.work.secondaryCtaLabel || "",
+          secondaryCtaUrl: contentData.work.secondaryCtaUrl || "",
         })
       }
     } catch (err) {
@@ -227,9 +431,27 @@ export function AdminDashboard() {
         .map((item) => item.trim())
         .filter(Boolean),
       idealFor: serviceForm.idealFor,
+      eyebrow: serviceForm.eyebrow.trim(),
+      badgeLabel: serviceForm.badgeLabel.trim(),
+      icon: serviceForm.icon,
+      theme: serviceForm.theme,
+      tags: serviceForm.tags
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      detailTabs: serviceForm.detailTabs
+        .map((tab) => ({
+          title: tab.title.trim(),
+          items: tab.itemsText
+            .split("\n")
+            .map((item) => item.trim())
+            .filter(Boolean)
+            .slice(0, 6),
+        }))
+        .filter((tab) => tab.title && tab.items.length > 0)
+        .slice(0, 3),
       visible: serviceForm.visible,
       featured: serviceForm.featured,
-      categoryId: serviceForm.categoryId,
     }
 
     if (serviceForm.id) {
@@ -254,39 +476,15 @@ export function AdminDashboard() {
       description: "",
       includes: "",
       idealFor: "",
+      eyebrow: "",
+      badgeLabel: "",
+      icon: "Monitor",
+      theme: "blue",
+      tags: "",
+      detailTabs: buildServiceTabsForm(),
       visible: true,
       featured: false,
-      categoryId: "",
     })
-  }
-
-  const handleCategorySubmit = async (event) => {
-    event.preventDefault()
-    const payload = {
-      title: categoryForm.title,
-      items: categoryForm.items
-        .split("\n")
-        .map((item) => item.trim())
-        .filter(Boolean),
-    }
-
-    if (categoryForm.id) {
-      const updated = await apiFetch(`/api/admin/categories/${categoryForm.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      })
-      setCategories((prev) =>
-        prev.map((item) => (item._id === updated._id ? updated : item))
-      )
-    } else {
-      const created = await apiFetch("/api/admin/categories", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      })
-      setCategories((prev) => [created, ...prev])
-    }
-
-    setCategoryForm({ id: null, title: "", items: "" })
   }
 
   const handleProjectSubmit = async (event) => {
@@ -296,7 +494,17 @@ export function AdminDashboard() {
       description: projectForm.description,
       link: projectForm.link,
       industry: projectForm.industry,
+      domain: projectForm.domain,
+      badgeLabel: projectForm.badgeLabel,
+      accent: projectForm.accent,
+      icon: projectForm.icon,
+      summary: projectForm.summary,
+      includes: projectForm.includes
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean),
       outcome: projectForm.outcome,
+      idealFor: projectForm.idealFor,
       stack: projectForm.stack
         .split(",")
         .map((item) => item.trim())
@@ -324,7 +532,14 @@ export function AdminDashboard() {
       description: "",
       link: "",
       industry: "",
+      domain: "",
+      badgeLabel: "",
+      accent: "blue",
+      icon: "Monitor",
+      summary: "",
+      includes: "",
       outcome: "",
+      idealFor: "",
       stack: "",
       featured: false,
     })
@@ -515,11 +730,21 @@ export function AdminDashboard() {
     const payload = {
       heroTitle: contactForm.heroTitle,
       heroSubtitle: contactForm.heroSubtitle,
+      trustPoints: parseList(contactForm.trustPointsText),
+      formTitle: contactForm.formTitle,
+      formStatusLabel: contactForm.formStatusLabel,
+      serviceFieldLabel: contactForm.serviceFieldLabel,
+      directTitle: contactForm.directTitle,
       email: contactForm.email,
       whatsappUrl: contactForm.whatsappUrl,
-      locationText: contactForm.locationText,
+      linkedinUrl: contactForm.linkedinUrl,
+      linkedinLabel: contactForm.linkedinLabel,
+      nextStepsTitle: contactForm.nextStepsTitle,
       nextSteps: parseList(contactForm.nextStepsText),
+      requirementsTitle: contactForm.requirementsTitle,
       requirements: parseList(contactForm.requirementsText),
+      attachmentHint: contactForm.attachmentHint,
+      linkFieldLabel: contactForm.linkFieldLabel,
     }
     try {
       const updated = await apiFetch("/api/admin/content/contact", {
@@ -530,11 +755,21 @@ export function AdminDashboard() {
         setContactForm({
           heroTitle: updated.contact.heroTitle || "",
           heroSubtitle: updated.contact.heroSubtitle || "",
+          trustPointsText: (updated.contact.trustPoints || []).join("\n"),
+          formTitle: updated.contact.formTitle || "",
+          formStatusLabel: updated.contact.formStatusLabel || "",
+          serviceFieldLabel: updated.contact.serviceFieldLabel || "",
+          directTitle: updated.contact.directTitle || "",
           email: updated.contact.email || "",
           whatsappUrl: updated.contact.whatsappUrl || "",
-          locationText: updated.contact.locationText || "",
+          linkedinUrl: updated.contact.linkedinUrl || "",
+          linkedinLabel: updated.contact.linkedinLabel || "",
+          nextStepsTitle: updated.contact.nextStepsTitle || "",
           nextStepsText: (updated.contact.nextSteps || []).join("\n"),
+          requirementsTitle: updated.contact.requirementsTitle || "",
           requirementsText: (updated.contact.requirements || []).join("\n"),
+          attachmentHint: updated.contact.attachmentHint || "",
+          linkFieldLabel: updated.contact.linkFieldLabel || "",
         })
       }
       setError("")
@@ -545,7 +780,39 @@ export function AdminDashboard() {
 
   const saveHomeContent = async () => {
     const payload = {
+      hero_title: homeForm.hero_title.trim(),
+      hero_subtitle: homeForm.hero_subtitle.trim(),
+      hero_description: homeForm.hero_description.trim(),
+      hero_primary_button_text: homeForm.hero_primary_button_text.trim(),
+      hero_primary_button_link: homeForm.hero_primary_button_link.trim(),
+      hero_secondary_button_text: homeForm.hero_secondary_button_text.trim(),
+      hero_secondary_button_link: homeForm.hero_secondary_button_link.trim(),
+      brand_accent_color: homeForm.brand_accent_color.trim(),
+      trusted_badges: (homeForm.trusted_badges || []).map((item) => item.trim()).filter(Boolean),
+      why_choose_items: (homeForm.why_choose_items || [])
+        .map((item) => ({
+          icon: (item.icon || "").trim(),
+          title: (item.title || "").trim(),
+          description: (item.description || "").trim(),
+        }))
+        .filter((item) => item.title || item.description || item.icon),
+      stats: (homeForm.stats || [])
+        .map((item) => ({
+          value: (item.value || "").trim(),
+          label: (item.label || "").trim(),
+        }))
+        .filter((item) => item.value || item.label),
       heroCards: homeForm.heroCards,
+      trustLabel: homeForm.trustLabel,
+      trustLogos: (homeForm.trustLogos || []).map((item) => item.trim()).filter(Boolean),
+      showTestimonials: homeForm.showTestimonials,
+      testimonials: (homeForm.testimonials || [])
+        .map((item) => ({
+          quote: item.quote.trim(),
+          name: item.name.trim(),
+          role: item.role.trim(),
+        }))
+        .filter((item) => item.quote || item.name || item.role),
     }
     try {
       const updated = await apiFetch("/api/admin/content/home", {
@@ -554,12 +821,68 @@ export function AdminDashboard() {
       })
       if (updated?.home) {
         setHomeForm({
-          heroCards: updated.home.heroCards || [],
+          hero_title: updated.home.hero_title || "",
+          hero_subtitle: updated.home.hero_subtitle || "",
+          hero_description: updated.home.hero_description || "",
+          hero_primary_button_text: updated.home.hero_primary_button_text || "",
+          hero_primary_button_link: updated.home.hero_primary_button_link || "",
+          hero_secondary_button_text: updated.home.hero_secondary_button_text || "",
+          hero_secondary_button_link: updated.home.hero_secondary_button_link || "",
+          brand_accent_color: updated.home.brand_accent_color || "#2F6BFF",
+          trusted_badges: buildHomeLogoSlots(updated.home.trusted_badges || [], 5),
+          why_choose_items: buildWhyChooseSlots(updated.home.why_choose_items || []),
+          stats: buildHomeStatSlots(updated.home.stats || []),
+          heroCards: updated.home.heroCards?.length
+            ? updated.home.heroCards
+            : defaultHomeHeroCards,
+          trustLabel: updated.home.trustLabel || "",
+          trustLogos: buildHomeLogoSlots(updated.home.trustLogos || []),
+          showTestimonials: updated.home.showTestimonials ?? true,
+          testimonials:
+            updated.home.testimonials?.length > 0
+              ? updated.home.testimonials.map((item) => ({ ...emptyHomeTestimonial, ...item }))
+              : buildHomeTestimonialSlots(),
         })
       }
       setError("")
     } catch (err) {
       setError(err.message || "Failed to save home content.")
+    }
+  }
+
+  const saveWorkContent = async () => {
+    const payload = {
+      heroTitle: workForm.heroTitle,
+      heroSubtitle: workForm.heroSubtitle,
+      allProjectsLabel: workForm.allProjectsLabel,
+      ctaTitle: workForm.ctaTitle,
+      ctaSubtitle: workForm.ctaSubtitle,
+      primaryCtaLabel: workForm.primaryCtaLabel,
+      primaryCtaUrl: workForm.primaryCtaUrl,
+      secondaryCtaLabel: workForm.secondaryCtaLabel,
+      secondaryCtaUrl: workForm.secondaryCtaUrl,
+    }
+    try {
+      const updated = await apiFetch("/api/admin/content/work", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      })
+      if (updated?.work) {
+        setWorkForm({
+          heroTitle: updated.work.heroTitle || "",
+          heroSubtitle: updated.work.heroSubtitle || "",
+          allProjectsLabel: updated.work.allProjectsLabel || "",
+          ctaTitle: updated.work.ctaTitle || "",
+          ctaSubtitle: updated.work.ctaSubtitle || "",
+          primaryCtaLabel: updated.work.primaryCtaLabel || "",
+          primaryCtaUrl: updated.work.primaryCtaUrl || "",
+          secondaryCtaLabel: updated.work.secondaryCtaLabel || "",
+          secondaryCtaUrl: updated.work.secondaryCtaUrl || "",
+        })
+      }
+      setError("")
+    } catch (err) {
+      setError(err.message || "Failed to save work content.")
     }
   }
 
@@ -615,10 +938,9 @@ export function AdminDashboard() {
       orders: orders.length,
       trending: trending.length,
       services: services.length,
-      categories: categories.length,
       projects: projects.length,
     }),
-    [contacts, chatLeads, orders, trending, services, categories, projects]
+    [contacts, chatLeads, orders, trending, services, projects]
   )
 
   return (
@@ -663,9 +985,6 @@ export function AdminDashboard() {
                 {tab === "trending" && stats.trending > 0 && (
                   <Badge variant="outline">{stats.trending}</Badge>
                 )}
-                {tab === "categories" && stats.categories > 0 && (
-                  <Badge variant="outline">{stats.categories}</Badge>
-                )}
               </button>
             ))}
           </aside>
@@ -696,6 +1015,11 @@ export function AdminDashboard() {
                           <div className="text-xs text-slate">
                             {contact.phone}
                           </div>
+                          {contact.serviceNeeded ? (
+                            <div className="text-xs text-slate">
+                              Service: {contact.serviceNeeded}
+                            </div>
+                          ) : null}
                           <div className="text-xs text-slate">
                             {new Date(contact.createdAt).toLocaleString()}
                           </div>
@@ -722,6 +1046,37 @@ export function AdminDashboard() {
                       <p className="mt-3 text-sm text-slate">
                         {contact.message}
                       </p>
+                      {(contact.company || contact.referenceLink || contact.attachmentUrl) && (
+                        <div className="mt-3 space-y-1 text-xs text-slate">
+                          {contact.company ? <div>Company: {contact.company}</div> : null}
+                          {contact.referenceLink ? (
+                            <div>
+                              Reference link:{" "}
+                              <a
+                                href={contact.referenceLink}
+                                className="font-medium text-moss"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {contact.referenceLink}
+                              </a>
+                            </div>
+                          ) : null}
+                          {contact.attachmentUrl ? (
+                            <div>
+                              Attachment:{" "}
+                              <a
+                                href={`${API_URL}${contact.attachmentUrl}`}
+                                className="font-medium text-moss"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {contact.attachmentName || "View file"}
+                              </a>
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </CardContent>
@@ -1066,23 +1421,71 @@ export function AdminDashboard() {
                         }
                       />
                     </div>
-                    <select
-                      className="h-10 w-full rounded-md border border-fog bg-white px-3 text-sm"
-                      value={serviceForm.categoryId}
-                      onChange={(e) =>
-                        setServiceForm((prev) => ({
-                          ...prev,
-                          categoryId: e.target.value,
-                        }))
-                      }
-                    >
-                      <option value="">Category (optional)</option>
-                      {categories.map((category) => (
-                        <option key={category._id} value={category._id}>
-                          {category.title}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Input
+                        placeholder="Eyebrow label"
+                        value={serviceForm.eyebrow}
+                        onChange={(e) =>
+                          setServiceForm((prev) => ({
+                            ...prev,
+                            eyebrow: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="Badge label"
+                        value={serviceForm.badgeLabel}
+                        onChange={(e) =>
+                          setServiceForm((prev) => ({
+                            ...prev,
+                            badgeLabel: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-3">
+                      <select
+                        className="h-10 w-full rounded-md border border-fog bg-white px-3 text-sm"
+                        value={serviceForm.icon}
+                        onChange={(e) =>
+                          setServiceForm((prev) => ({
+                            ...prev,
+                            icon: e.target.value,
+                          }))
+                        }
+                      >
+                        {serviceIconOptions.map((iconName) => (
+                          <option key={iconName} value={iconName}>
+                            {iconName}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className="h-10 w-full rounded-md border border-fog bg-white px-3 text-sm"
+                        value={serviceForm.theme}
+                        onChange={(e) =>
+                          setServiceForm((prev) => ({
+                            ...prev,
+                            theme: e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="blue">Blue</option>
+                        <option value="blue-featured">Blue Featured</option>
+                        <option value="teal">Teal</option>
+                        <option value="amber">Amber</option>
+                      </select>
+                      <Input
+                        placeholder="Tags (comma separated)"
+                        value={serviceForm.tags}
+                        onChange={(e) =>
+                          setServiceForm((prev) => ({
+                            ...prev,
+                            tags: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
                     <Textarea
                       placeholder="Short description"
                       value={serviceForm.description}
@@ -1103,6 +1506,42 @@ export function AdminDashboard() {
                         }))
                       }
                     />
+                    <div className="rounded-lg border border-fog bg-sand p-4">
+                      <div className="mb-3 text-sm font-semibold text-ink">
+                        Service details
+                      </div>
+                      <div className="grid gap-4">
+                        {serviceForm.detailTabs.map((tab, index) => (
+                          <div
+                            key={`service-tab-${index}`}
+                            className="rounded-lg border border-fog bg-white p-4"
+                          >
+                            <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-ink/60">
+                              {tab.title}
+                            </div>
+                            <Input
+                              readOnly
+                              value={tab.title}
+                            />
+                            <Textarea
+                              className="mt-3"
+                              placeholder={`${tab.title} items (one per line, up to 6)`}
+                              value={tab.itemsText}
+                              onChange={(e) =>
+                                setServiceForm((prev) => {
+                                  const nextTabs = [...prev.detailTabs]
+                                  nextTabs[index] = {
+                                    ...nextTabs[index],
+                                    itemsText: e.target.value,
+                                  }
+                                  return { ...prev, detailTabs: nextTabs }
+                                })
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <label className="flex items-center gap-2 text-sm text-slate">
                       <input
                         type="checkbox"
@@ -1158,9 +1597,14 @@ export function AdminDashboard() {
                                   description: service.description,
                                   includes: service.includes.join(", "),
                                   idealFor: service.idealFor,
+                                  eyebrow: service.eyebrow || "",
+                                  badgeLabel: service.badgeLabel || "",
+                                  icon: service.icon || "Monitor",
+                                  theme: service.theme || "blue",
+                                  tags: (service.tags || []).join(", "),
+                                  detailTabs: buildServiceTabsForm(service.detailTabs || []),
                                   visible: service.visible,
                                   featured: service.featured,
-                                  categoryId: service.categoryId?._id || "",
                                 })
                               }
                             >
@@ -1191,92 +1635,10 @@ export function AdminDashboard() {
                         <p className="mt-2 text-sm text-slate">
                           {service.description}
                         </p>
-                        {service.categoryId?.title && (
-                          <p className="mt-2 text-xs text-ink/60">
-                            Category: {service.categoryId.title}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {active === "categories" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Service categories</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <form className="grid gap-3" onSubmit={handleCategorySubmit}>
-                    <Input
-                      placeholder="Category title"
-                      value={categoryForm.title}
-                      onChange={(e) =>
-                        setCategoryForm((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                    />
-                    <Textarea
-                      placeholder="Items (one per line)"
-                      value={categoryForm.items}
-                      onChange={(e) =>
-                        setCategoryForm((prev) => ({
-                          ...prev,
-                          items: e.target.value,
-                        }))
-                      }
-                    />
-                    <Button type="submit">
-                      {categoryForm.id ? "Update category" : "Add category"}
-                    </Button>
-                  </form>
-
-                  <div className="space-y-3">
-                    {categories.map((category) => (
-                      <div
-                        key={category._id}
-                        className="rounded-lg border border-fog bg-sand p-4"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-semibold">{category.title}</div>
-                            <div className="text-xs text-slate">
-                              {category.items?.length || 0} items
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                setCategoryForm({
-                                  id: category._id,
-                                  title: category.title,
-                                  items: (category.items || []).join("\n"),
-                                })
-                              }
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={async () => {
-                                await apiFetch(`/api/admin/categories/${category._id}`, {
-                                  method: "DELETE",
-                                })
-                                setCategories((prev) =>
-                                  prev.filter((item) => item._id !== category._id)
-                                )
-                              }}
-                            >
-                              Delete
-                            </Button>
-                          </div>
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                          {service.icon ? <Badge variant="outline">{service.icon}</Badge> : null}
+                          {service.theme ? <Badge variant="outline">{service.theme}</Badge> : null}
+                          {service.badgeLabel ? <Badge variant="outline">{service.badgeLabel}</Badge> : null}
                         </div>
                       </div>
                     ))}
@@ -1312,6 +1674,62 @@ export function AdminDashboard() {
                         }))
                       }
                     />
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Input
+                        placeholder="Domain label"
+                        value={projectForm.domain}
+                        onChange={(e) =>
+                          setProjectForm((prev) => ({
+                            ...prev,
+                            domain: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="Badge label"
+                        value={projectForm.badgeLabel}
+                        onChange={(e) =>
+                          setProjectForm((prev) => ({
+                            ...prev,
+                            badgeLabel: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <select
+                        className="h-10 w-full rounded-md border border-fog bg-white px-3 text-sm"
+                        value={projectForm.icon}
+                        onChange={(e) =>
+                          setProjectForm((prev) => ({
+                            ...prev,
+                            icon: e.target.value,
+                          }))
+                        }
+                      >
+                        {projectIconOptions.map((iconName) => (
+                          <option key={iconName} value={iconName}>
+                            {iconName}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className="h-10 w-full rounded-md border border-fog bg-white px-3 text-sm"
+                        value={projectForm.accent}
+                        onChange={(e) =>
+                          setProjectForm((prev) => ({
+                            ...prev,
+                            accent: e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="amber">Amber</option>
+                        <option value="purple">Purple</option>
+                        <option value="pink">Pink</option>
+                      </select>
+                    </div>
                     <Textarea
                       placeholder="Project description"
                       value={projectForm.description}
@@ -1322,6 +1740,26 @@ export function AdminDashboard() {
                         }))
                       }
                     />
+                    <Textarea
+                      placeholder="Short summary"
+                      value={projectForm.summary}
+                      onChange={(e) =>
+                        setProjectForm((prev) => ({
+                          ...prev,
+                          summary: e.target.value,
+                        }))
+                      }
+                    />
+                    <Textarea
+                      placeholder="Includes (one per line)"
+                      value={projectForm.includes}
+                      onChange={(e) =>
+                        setProjectForm((prev) => ({
+                          ...prev,
+                          includes: e.target.value,
+                        }))
+                      }
+                    />
                     <Input
                       placeholder="Outcome (short, honest)"
                       value={projectForm.outcome}
@@ -1329,6 +1767,16 @@ export function AdminDashboard() {
                         setProjectForm((prev) => ({
                           ...prev,
                           outcome: e.target.value,
+                        }))
+                      }
+                    />
+                    <Input
+                      placeholder="Ideal for"
+                      value={projectForm.idealFor}
+                      onChange={(e) =>
+                        setProjectForm((prev) => ({
+                          ...prev,
+                          idealFor: e.target.value,
                         }))
                       }
                     />
@@ -1394,7 +1842,14 @@ export function AdminDashboard() {
                                   description: project.description,
                                   link: project.link,
                                   industry: project.industry || "",
+                                  domain: project.domain || "",
+                                  badgeLabel: project.badgeLabel || "",
+                                  accent: project.accent || "blue",
+                                  icon: project.icon || "Monitor",
+                                  summary: project.summary || "",
+                                  includes: (project.includes || []).join("\n"),
                                   outcome: project.outcome || "",
+                                  idealFor: project.idealFor || "",
                                   stack: (project.stack || []).join(", "),
                                   featured: project.featured || false,
                                 })
@@ -1421,6 +1876,18 @@ export function AdminDashboard() {
                         <p className="mt-2 text-sm text-slate">
                           {project.description}
                         </p>
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                          {project.domain ? <Badge variant="outline">{project.domain}</Badge> : null}
+                          {project.badgeLabel ? (
+                            <Badge variant="outline">{project.badgeLabel}</Badge>
+                          ) : null}
+                          {project.accent ? <Badge variant="outline">{project.accent}</Badge> : null}
+                        </div>
+                        {project.summary && (
+                          <p className="mt-2 text-sm text-ink/80">
+                            {project.summary}
+                          </p>
+                        )}
                         {project.outcome && (
                           <p className="mt-2 text-sm text-ink">
                             Outcome: {project.outcome}
@@ -1435,6 +1902,27 @@ export function AdminDashboard() {
 
             {active === "pages" && (
               <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Page editor</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {pageEditorSections.map((section) => (
+                        <Button
+                          key={section.id}
+                          type="button"
+                          variant={activePageEditor === section.id ? "default" : "outline"}
+                          onClick={() => setActivePageEditor(section.id)}
+                        >
+                          {section.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {activePageEditor === "about" && (
                 <Card>
                   <CardHeader>
                     <CardTitle>About page</CardTitle>
@@ -1521,7 +2009,9 @@ export function AdminDashboard() {
                     </form>
                   </CardContent>
                 </Card>
+                )}
 
+                {activePageEditor === "about" && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Team members</CardTitle>
@@ -1639,7 +2129,9 @@ export function AdminDashboard() {
                     </div>
                   </CardContent>
                 </Card>
+                )}
 
+                {activePageEditor === "contact" && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Contact page</CardTitle>
@@ -1672,6 +2164,60 @@ export function AdminDashboard() {
                           }))
                         }
                       />
+                      <Textarea
+                        placeholder="Trust points (one per line)"
+                        value={contactForm.trustPointsText}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            trustPointsText: e.target.value,
+                          }))
+                        }
+                      />
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Input
+                          placeholder="Form title"
+                          value={contactForm.formTitle}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              formTitle: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          placeholder="Form status label"
+                          value={contactForm.formStatusLabel}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              formStatusLabel: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Input
+                          placeholder="Service field label"
+                          value={contactForm.serviceFieldLabel}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              serviceFieldLabel: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          placeholder="Direct contact title"
+                          value={contactForm.directTitle}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              directTitle: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
                       <Input
                         placeholder="Contact email"
                         value={contactForm.email}
@@ -1692,13 +2238,35 @@ export function AdminDashboard() {
                           }))
                         }
                       />
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Input
+                          placeholder="LinkedIn URL"
+                          value={contactForm.linkedinUrl}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              linkedinUrl: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          placeholder="LinkedIn label"
+                          value={contactForm.linkedinLabel}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              linkedinLabel: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
                       <Input
-                        placeholder="Location line"
-                        value={contactForm.locationText}
+                        placeholder="Next steps title"
+                        value={contactForm.nextStepsTitle}
                         onChange={(e) =>
                           setContactForm((prev) => ({
                             ...prev,
-                            locationText: e.target.value,
+                            nextStepsTitle: e.target.value,
                           }))
                         }
                       />
@@ -1712,6 +2280,16 @@ export function AdminDashboard() {
                           }))
                         }
                       />
+                      <Input
+                        placeholder="Requirements title"
+                        value={contactForm.requirementsTitle}
+                        onChange={(e) =>
+                          setContactForm((prev) => ({
+                            ...prev,
+                            requirementsTitle: e.target.value,
+                          }))
+                        }
+                      />
                       <Textarea
                         placeholder="Requirements (one per line)"
                         value={contactForm.requirementsText}
@@ -1722,14 +2300,151 @@ export function AdminDashboard() {
                           }))
                         }
                       />
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Input
+                          placeholder="Attachment helper text"
+                          value={contactForm.attachmentHint}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              attachmentHint: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          placeholder="Link field label"
+                          value={contactForm.linkFieldLabel}
+                          onChange={(e) =>
+                            setContactForm((prev) => ({
+                              ...prev,
+                              linkFieldLabel: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
                       <Button type="submit">Save contact content</Button>
                     </form>
                   </CardContent>
                 </Card>
+                )}
 
+                {activePageEditor === "work" && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Home hero images</CardTitle>
+                    <CardTitle>Work page</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <form
+                      className="grid gap-3"
+                      onSubmit={async (event) => {
+                        event.preventDefault()
+                        await saveWorkContent()
+                      }}
+                    >
+                      <Input
+                        placeholder="Hero title"
+                        value={workForm.heroTitle}
+                        onChange={(e) =>
+                          setWorkForm((prev) => ({
+                            ...prev,
+                            heroTitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="Hero subtitle"
+                        value={workForm.heroSubtitle}
+                        onChange={(e) =>
+                          setWorkForm((prev) => ({
+                            ...prev,
+                            heroSubtitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="All projects filter label"
+                        value={workForm.allProjectsLabel}
+                        onChange={(e) =>
+                          setWorkForm((prev) => ({
+                            ...prev,
+                            allProjectsLabel: e.target.value,
+                          }))
+                        }
+                      />
+                      <Input
+                        placeholder="CTA title"
+                        value={workForm.ctaTitle}
+                        onChange={(e) =>
+                          setWorkForm((prev) => ({
+                            ...prev,
+                            ctaTitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <Textarea
+                        placeholder="CTA subtitle"
+                        value={workForm.ctaSubtitle}
+                        onChange={(e) =>
+                          setWorkForm((prev) => ({
+                            ...prev,
+                            ctaSubtitle: e.target.value,
+                          }))
+                        }
+                      />
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Input
+                          placeholder="Primary CTA label"
+                          value={workForm.primaryCtaLabel}
+                          onChange={(e) =>
+                            setWorkForm((prev) => ({
+                              ...prev,
+                              primaryCtaLabel: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          placeholder="Primary CTA URL"
+                          value={workForm.primaryCtaUrl}
+                          onChange={(e) =>
+                            setWorkForm((prev) => ({
+                              ...prev,
+                              primaryCtaUrl: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Input
+                          placeholder="Secondary CTA label"
+                          value={workForm.secondaryCtaLabel}
+                          onChange={(e) =>
+                            setWorkForm((prev) => ({
+                              ...prev,
+                              secondaryCtaLabel: e.target.value,
+                            }))
+                          }
+                        />
+                        <Input
+                          placeholder="Secondary CTA URL"
+                          value={workForm.secondaryCtaUrl}
+                          onChange={(e) =>
+                            setWorkForm((prev) => ({
+                              ...prev,
+                              secondaryCtaUrl: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <Button type="submit">Save work content</Button>
+                    </form>
+                  </CardContent>
+                </Card>
+                )}
+
+                {activePageEditor === "home" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Home content</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <form
@@ -1739,68 +2454,398 @@ export function AdminDashboard() {
                         await saveHomeContent()
                       }}
                     >
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {[0, 1].map((index) => {
-                          const card = homeForm.heroCards?.[index] || {
-                            imageUrl: "",
-                            caption: "",
+                      <div className="grid gap-4 rounded-xl border border-fog bg-[#f8fbff] p-4">
+                        <div className="text-sm font-medium text-ink">Hero copy</div>
+                        <Input
+                          placeholder="Hero title"
+                          value={homeForm.hero_title}
+                          onChange={(e) =>
+                            setHomeForm((prev) => ({
+                              ...prev,
+                              hero_title: e.target.value,
+                            }))
                           }
-                          return (
-                            <div
-                              key={`home-hero-${index}`}
-                              className="rounded-xl border border-fog bg-white p-3"
-                            >
-                              <div className="mb-3 aspect-[16/9] w-full overflow-hidden rounded-lg bg-sand">
-                                {card.imageUrl ? (
-                                  <OptimizedImage
-                                    src={resolveImageUrl(card.imageUrl)}
-                                    alt={`Hero ${index + 1}`}
-                                    width={1200}
-                                    height={675}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="flex h-full items-center justify-center text-xs text-ink/40">
-                                    No image
-                                  </div>
-                                )}
-                              </div>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0]
-                                  if (file) {
-                                    openCropper(file, { section: "home", index }, 16 / 9)
-                                  }
-                                }}
-                              />
-                              <Input
-                                className="mt-3"
-                                placeholder="Caption"
-                                value={card.caption || ""}
-                                onChange={(e) =>
-                                  setHomeForm((prev) => {
-                                    const next = [...(prev.heroCards || [])]
-                                    if (!next[index]) {
-                                      next[index] = { imageUrl: "", caption: "" }
-                                    }
-                                    next[index] = {
-                                      ...next[index],
-                                      caption: e.target.value,
-                                    }
-                                    return { ...prev, heroCards: next }
-                                  })
-                                }
-                              />
-                            </div>
-                          )
-                        })}
+                        />
+                        <Input
+                          placeholder="Hero subtitle"
+                          value={homeForm.hero_subtitle}
+                          onChange={(e) =>
+                            setHomeForm((prev) => ({
+                              ...prev,
+                              hero_subtitle: e.target.value,
+                            }))
+                          }
+                        />
+                        <Textarea
+                          placeholder="Hero description"
+                          value={homeForm.hero_description}
+                          onChange={(e) =>
+                            setHomeForm((prev) => ({
+                              ...prev,
+                              hero_description: e.target.value,
+                            }))
+                          }
+                        />
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <Input
+                            placeholder="Primary button text"
+                            value={homeForm.hero_primary_button_text}
+                            onChange={(e) =>
+                              setHomeForm((prev) => ({
+                                ...prev,
+                                hero_primary_button_text: e.target.value,
+                              }))
+                            }
+                          />
+                          <Input
+                            placeholder="Primary button link"
+                            value={homeForm.hero_primary_button_link}
+                            onChange={(e) =>
+                              setHomeForm((prev) => ({
+                                ...prev,
+                                hero_primary_button_link: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <Input
+                            placeholder="Secondary button text"
+                            value={homeForm.hero_secondary_button_text}
+                            onChange={(e) =>
+                              setHomeForm((prev) => ({
+                                ...prev,
+                                hero_secondary_button_text: e.target.value,
+                              }))
+                            }
+                          />
+                          <Input
+                            placeholder="Secondary button link"
+                            value={homeForm.hero_secondary_button_link}
+                            onChange={(e) =>
+                              setHomeForm((prev) => ({
+                                ...prev,
+                                hero_secondary_button_link: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                        <Input
+                          placeholder="Brand accent color (#2F6BFF)"
+                          value={homeForm.brand_accent_color}
+                          onChange={(e) =>
+                            setHomeForm((prev) => ({
+                              ...prev,
+                              brand_accent_color: e.target.value,
+                            }))
+                          }
+                        />
                       </div>
-                      <Button type="submit">Save home images</Button>
+
+                      <div className="grid gap-3 rounded-xl border border-fog bg-[#f8fbff] p-4">
+                        <div className="text-sm font-medium text-ink">Trusted badges</div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {(homeForm.trusted_badges || []).map((badge, index) => (
+                            <Input
+                              key={`trusted-badge-${index}`}
+                              placeholder={`Trusted badge ${index + 1}`}
+                              value={badge || ""}
+                              onChange={(e) =>
+                                setHomeForm((prev) => {
+                                  const next = [...(prev.trusted_badges || [])]
+                                  next[index] = e.target.value
+                                  return { ...prev, trusted_badges: next }
+                                })
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 rounded-xl border border-fog bg-[#f8fbff] p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-sm font-medium text-ink">Why choose items</div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                              setHomeForm((prev) => ({
+                                ...prev,
+                                why_choose_items: [
+                                  ...(prev.why_choose_items || []),
+                                  { icon: "ShieldCheck", title: "", description: "" },
+                                ],
+                              }))
+                            }
+                          >
+                            + Add item
+                          </Button>
+                        </div>
+                        <div className="grid gap-4">
+                          {(homeForm.why_choose_items || []).map((item, index) => (
+                            <div
+                              key={`why-choose-${index}`}
+                              className="rounded-xl border border-fog bg-white p-4"
+                            >
+                              <div className="grid gap-3">
+                                <div className="grid gap-3 md:grid-cols-[180px_1fr]">
+                                  <select
+                                    className="flex h-11 w-full rounded-[12px] border border-[#cbd5e1] bg-white px-4 py-2 text-[14px] text-[#0f172a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:ring-offset-2 ring-offset-sand"
+                                    value={item.icon || "ShieldCheck"}
+                                    onChange={(e) =>
+                                      setHomeForm((prev) => {
+                                        const next = [...(prev.why_choose_items || [])]
+                                        next[index] = { ...next[index], icon: e.target.value }
+                                        return { ...prev, why_choose_items: next }
+                                      })
+                                    }
+                                  >
+                                    {serviceIconOptions.map((option) => (
+                                      <option key={option} value={option}>
+                                        {option}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <Input
+                                    placeholder="Card title"
+                                    value={item.title || ""}
+                                    onChange={(e) =>
+                                      setHomeForm((prev) => {
+                                        const next = [...(prev.why_choose_items || [])]
+                                        next[index] = { ...next[index], title: e.target.value }
+                                        return { ...prev, why_choose_items: next }
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <Textarea
+                                  placeholder="Card description"
+                                  value={item.description || ""}
+                                  onChange={(e) =>
+                                    setHomeForm((prev) => {
+                                      const next = [...(prev.why_choose_items || [])]
+                                      next[index] = {
+                                        ...next[index],
+                                        description: e.target.value,
+                                      }
+                                      return { ...prev, why_choose_items: next }
+                                    })
+                                  }
+                                />
+                                <div className="flex justify-end">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() =>
+                                      setHomeForm((prev) => ({
+                                        ...prev,
+                                        why_choose_items: prev.why_choose_items.filter(
+                                          (_, itemIndex) => itemIndex !== index
+                                        ),
+                                      }))
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 rounded-xl border border-fog bg-[#f8fbff] p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-sm font-medium text-ink">Stats</div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                              setHomeForm((prev) => ({
+                                ...prev,
+                                stats: [...(prev.stats || []), { value: "", label: "" }],
+                              }))
+                            }
+                          >
+                            + Add stat
+                          </Button>
+                        </div>
+                        <div className="grid gap-4">
+                          {(homeForm.stats || []).map((item, index) => (
+                            <div
+                              key={`stat-${index}`}
+                              className="rounded-xl border border-fog bg-white p-4"
+                            >
+                              <div className="grid gap-3 md:grid-cols-[160px_1fr_auto]">
+                                <Input
+                                  placeholder="Value"
+                                  value={item.value || ""}
+                                  onChange={(e) =>
+                                    setHomeForm((prev) => {
+                                      const next = [...(prev.stats || [])]
+                                      next[index] = { ...next[index], value: e.target.value }
+                                      return { ...prev, stats: next }
+                                    })
+                                  }
+                                />
+                                <Input
+                                  placeholder="Label"
+                                  value={item.label || ""}
+                                  onChange={(e) =>
+                                    setHomeForm((prev) => {
+                                      const next = [...(prev.stats || [])]
+                                      next[index] = { ...next[index], label: e.target.value }
+                                      return { ...prev, stats: next }
+                                    })
+                                  }
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setHomeForm((prev) => ({
+                                      ...prev,
+                                      stats: prev.stats.filter((_, itemIndex) => itemIndex !== index),
+                                    }))
+                                  }
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3">
+                        <Input
+                          placeholder="Legacy trust strip label"
+                          value={homeForm.trustLabel}
+                          onChange={(e) =>
+                            setHomeForm((prev) => ({
+                              ...prev,
+                              trustLabel: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-sm font-medium text-ink">Testimonials</div>
+                          <label className="flex items-center gap-2 text-sm text-slate">
+                            <input
+                              type="checkbox"
+                              checked={homeForm.showTestimonials}
+                              onChange={(e) =>
+                                setHomeForm((prev) => ({
+                                  ...prev,
+                                  showTestimonials: e.target.checked,
+                                }))
+                              }
+                            />
+                            Show section
+                          </label>
+                        </div>
+                        <div className="grid gap-4">
+                          {(homeForm.testimonials || []).map((testimonial, index) => (
+                            <div
+                              key={`testimonial-${index}`}
+                              className="rounded-xl border border-fog bg-white p-4"
+                            >
+                              <div className="grid gap-3">
+                                <Textarea
+                                  placeholder="Client quote"
+                                  value={testimonial.quote || ""}
+                                  onChange={(e) =>
+                                    setHomeForm((prev) => {
+                                      const next = [...(prev.testimonials || [])]
+                                      if (!next[index]) {
+                                        next[index] = { quote: "", name: "", role: "" }
+                                      }
+                                      next[index] = {
+                                        ...next[index],
+                                        quote: e.target.value,
+                                      }
+                                      return { ...prev, testimonials: next }
+                                    })
+                                  }
+                                />
+                                <div className="grid gap-3 md:grid-cols-2">
+                                  <Input
+                                    placeholder="Client name"
+                                    value={testimonial.name || ""}
+                                    onChange={(e) =>
+                                      setHomeForm((prev) => {
+                                        const next = [...(prev.testimonials || [])]
+                                        if (!next[index]) {
+                                          next[index] = { quote: "", name: "", role: "" }
+                                        }
+                                        next[index] = {
+                                          ...next[index],
+                                          name: e.target.value,
+                                        }
+                                        return { ...prev, testimonials: next }
+                                      })
+                                    }
+                                  />
+                                  <Input
+                                    placeholder="Client role or company"
+                                    value={testimonial.role || ""}
+                                    onChange={(e) =>
+                                      setHomeForm((prev) => {
+                                        const next = [...(prev.testimonials || [])]
+                                        if (!next[index]) {
+                                          next[index] = { quote: "", name: "", role: "" }
+                                        }
+                                        next[index] = {
+                                          ...next[index],
+                                          role: e.target.value,
+                                        }
+                                        return { ...prev, testimonials: next }
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div className="flex justify-end">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() =>
+                                      setHomeForm((prev) => ({
+                                        ...prev,
+                                        testimonials: prev.testimonials.filter(
+                                          (_, itemIndex) => itemIndex !== index
+                                        ),
+                                      }))
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            setHomeForm((prev) => ({
+                              ...prev,
+                              testimonials: [...(prev.testimonials || []), { ...emptyHomeTestimonial }],
+                            }))
+                          }
+                        >
+                          + Add testimonial
+                        </Button>
+                      </div>
+
+                      <Button type="submit">Save home content</Button>
                     </form>
                   </CardContent>
                 </Card>
+                )}
               </div>
             )}
           </section>

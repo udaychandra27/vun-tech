@@ -8,7 +8,7 @@ import { formatBlogDate, resolveMediaUrl } from "@/lib/blog"
 
 export function BlogCard({ post }) {
   return (
-    <Card className="group overflow-hidden border-fog bg-white transition-transform duration-300 hover:-translate-y-1">
+    <Card className="group overflow-hidden rounded-[18px] border-fog bg-white shadow-[0_12px_34px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1">
       <div className="aspect-[16/10] overflow-hidden bg-slate-100">
         {post.featuredImage ? (
           <OptimizedImage
@@ -19,13 +19,13 @@ export function BlogCard({ post }) {
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-ink to-moss text-sm text-white/70">
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#2563eb] text-sm text-white/70">
             No featured image
           </div>
         )}
       </div>
-      <CardContent className="space-y-4 p-5">
-        <div className="flex flex-wrap items-center gap-3 text-xs text-slate">
+      <CardContent className="space-y-4 p-6">
+        <div className="flex flex-wrap items-center gap-3 text-[12px] text-slate">
           <span className="inline-flex items-center gap-1">
             <CalendarDays className="h-3.5 w-3.5" />
             {formatBlogDate(post.publishedAt || post.createdAt)}
@@ -39,16 +39,16 @@ export function BlogCard({ post }) {
 
         <div>
           <Link to={`/blog/${post.slug}`} className="block">
-            <h2 className="text-2xl font-semibold text-ink transition-colors group-hover:text-moss">
+            <h2 className="text-[28px] font-semibold text-ink transition-colors group-hover:text-moss">
               {post.title}
             </h2>
           </Link>
-          <p className="mt-3 text-sm leading-6 text-slate">{post.excerpt}</p>
+          <p className="mt-3 text-[14px] leading-7 text-slate">{post.excerpt}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           {post.category ? (
-            <Badge variant="secondary" className="bg-ink/5 text-ink">
+            <Badge variant="secondary" className="bg-[#dbeafe] text-[#1d4ed8]">
               {post.category}
             </Badge>
           ) : null}

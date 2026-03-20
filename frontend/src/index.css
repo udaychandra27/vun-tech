@@ -7,12 +7,17 @@
 @layer base {
   :root {
     color: #0e151b;
-    background-color: #f5f3ef;
+    background-color: #ffffff;
+    --accent-color: #2f6bff;
+    --accent-soft: color-mix(in srgb, var(--accent-color) 10%, white);
+    --accent-soft-strong: color-mix(in srgb, var(--accent-color) 16%, white);
+    --accent-glow: color-mix(in srgb, var(--accent-color) 24%, transparent);
+    --accent-border: color-mix(in srgb, var(--accent-color) 32%, white);
   }
 
   body {
-    font-family: "Inter", system-ui, sans-serif;
-    @apply bg-sand text-ink antialiased;
+    font-family: Arial, Helvetica, sans-serif;
+    @apply bg-white text-ink antialiased;
     overflow-x: hidden;
   }
 
@@ -20,11 +25,16 @@
   h2,
   h3,
   h4 {
-    font-family: "Fraunces", serif;
+    font-family: Arial, Helvetica, sans-serif;
   }
 
   a {
-    @apply text-ink hover:text-moss transition-colors;
+    color: inherit;
+    transition: color 180ms ease;
+  }
+
+  a:hover {
+    color: var(--accent-color);
   }
 
   img,
@@ -40,6 +50,14 @@
     text-wrap: balance;
   }
 
+  .brand-wordmark {
+    font-family: "Fraunces", serif;
+  }
+
+  .brand-tagline {
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
   .glass-card {
     background: #ffffff;
     border: 1px solid rgba(229, 231, 235, 0.9);
@@ -47,10 +65,8 @@
   }
 
   .bg-grid {
-    background-image: linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    background-position: -8px -8px;
+    background: #ffffff;
+    background-image: none;
   }
 
   .section-sheen {

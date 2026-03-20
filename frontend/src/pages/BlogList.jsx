@@ -45,23 +45,23 @@ export function BlogList() {
   const emptyState = useMemo(() => !loading && items.length === 0, [items.length, loading])
 
   return (
-    <div className="bg-sand">
+    <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_55%,#ffffff_100%)]">
       <Seo
         title="Blog | VUN Tech"
         description="Insights on product engineering, security, automation, and digital delivery."
         type="website"
       />
 
-      <section className="border-b border-fog bg-white">
+      <section className="border-b border-fog bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)]">
         <Container className="py-16">
           <div className="max-w-3xl space-y-5">
-            <div className="inline-flex rounded-full border border-fog bg-sand px-4 py-1 text-xs uppercase tracking-[0.22em] text-ink/70">
+            <div className="inline-flex rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-[#1d4ed8]">
               Insights & field notes
             </div>
-            <h1 className="text-4xl font-semibold md:text-5xl">
+            <h1 className="text-[40px] font-semibold tracking-[-0.04em] md:text-[58px]">
               Practical writing for teams shipping real software.
             </h1>
-            <p className="text-lg text-slate">
+            <p className="text-[17px] leading-8 text-slate">
               Ideas, case studies, and implementation notes across engineering, AI,
               cybersecurity, and growth systems.
             </p>
@@ -69,9 +69,9 @@ export function BlogList() {
         </Container>
       </section>
 
-      <section className="border-b border-fog bg-sand">
+      <section className="border-b border-fog bg-[#f8fbff]">
         <Container className="py-8">
-          <div className="grid gap-4 rounded-[2rem] border border-fog bg-white p-5 shadow-sm md:grid-cols-[1.3fr_0.7fr]">
+          <div className="grid gap-4 rounded-[2rem] border border-[#dbeafe] bg-white p-5 shadow-[0_12px_34px_rgba(15,23,42,0.04)] md:grid-cols-[1.3fr_0.7fr]">
             <form
               className="relative"
               onSubmit={(event) => {
@@ -90,7 +90,7 @@ export function BlogList() {
 
             <div className="flex flex-wrap items-center gap-2">
               <select
-                className="h-12 rounded-2xl border border-fog bg-sand px-4 text-sm"
+                className="h-12 rounded-2xl border border-[#cbd5e1] bg-[#f8fbff] px-4 text-sm"
                 value={activeCategory}
                 onChange={(event) => setActiveCategory(event.target.value)}
               >
@@ -110,7 +110,7 @@ export function BlogList() {
               <div className="flex flex-wrap gap-2">
                 <Badge
                   role="button"
-                  className={activeTag ? "cursor-pointer" : "cursor-pointer bg-ink text-sand"}
+                  className={activeTag ? "cursor-pointer" : "cursor-pointer bg-[#0f172a] text-white"}
                   onClick={() => setActiveTag("")}
                 >
                   All tags
@@ -120,7 +120,7 @@ export function BlogList() {
                     key={tag}
                     role="button"
                     variant={activeTag === tag ? "default" : "outline"}
-                    className={activeTag === tag ? "cursor-pointer bg-ink text-sand" : "cursor-pointer"}
+                    className={activeTag === tag ? "cursor-pointer bg-[#0f172a] text-white" : "cursor-pointer"}
                     onClick={() => setActiveTag(activeTag === tag ? "" : tag)}
                   >
                     {tag}
@@ -132,7 +132,7 @@ export function BlogList() {
         </Container>
       </section>
 
-      <section className="bg-sand">
+      <section className="bg-[#f8fbff]">
         <Container className="py-10">
           {loading ? (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

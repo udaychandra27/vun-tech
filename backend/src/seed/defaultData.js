@@ -117,6 +117,41 @@ export const defaultServices = [
     featured: true,
     categoryTitle: "Website & Technical",
     visible: true,
+    detailTabs: [
+      {
+        title: "Included",
+        items: [
+          "React frontend for core product workflows",
+          "Node and Express APIs for business logic",
+          "MongoDB modeling and database setup",
+          "Authentication and protected route support",
+          "Admin dashboards or reporting views",
+          "Testing and deployment preparation",
+        ],
+      },
+      {
+        title: "Process",
+        items: [
+          "Discovery to define scope and feature priorities",
+          "Architecture and screen planning before build",
+          "Milestone-based implementation with regular reviews",
+          "Feedback cycles for refinements and approvals",
+          "Staging checks before launch",
+          "Deployment coordination and handoff",
+        ],
+      },
+      {
+        title: "Deliverables",
+        items: [
+          "Production-ready MERN application",
+          "Structured source code repository",
+          "Deployment setup and environment guidance",
+          "Project documentation for future updates",
+          "Launch checklist and verification notes",
+          "Initial support after release",
+        ],
+      },
+    ],
   },
   {
     title: "Website & Landing Pages",
@@ -127,6 +162,41 @@ export const defaultServices = [
     featured: true,
     categoryTitle: "Website & Technical",
     visible: true,
+    detailTabs: [
+      {
+        title: "Included",
+        items: [
+          "Responsive marketing pages and landing flows",
+          "Conversion-focused layout and messaging support",
+          "Forms, CTAs, and key section buildout",
+          "Performance and mobile optimization",
+          "Basic CMS or content update readiness",
+          "Deployment configuration",
+        ],
+      },
+      {
+        title: "Process",
+        items: [
+          "Discovery on goals, audience, and offer clarity",
+          "Page structure and content direction planning",
+          "Design and development in clear milestones",
+          "Review rounds for copy and visual polish",
+          "Cross-device QA before launch",
+          "Production deployment and final checks",
+        ],
+      },
+      {
+        title: "Deliverables",
+        items: [
+          "Production-ready website or landing page set",
+          "Editable source code and asset structure",
+          "Live deployment on the chosen platform",
+          "Content update guidance for the team",
+          "Basic technical documentation",
+          "Post-launch support window",
+        ],
+      },
+    ],
   },
   {
     title: "Frontend Development",
@@ -136,6 +206,41 @@ export const defaultServices = [
     featured: true,
     categoryTitle: "Website & Technical",
     visible: true,
+    detailTabs: [
+      {
+        title: "Included",
+        items: [
+          "React screens and reusable component development",
+          "State handling and API integration",
+          "Responsive layout implementation",
+          "UI bug fixing and polish passes",
+          "Accessibility and interaction improvements",
+          "Frontend testing support",
+        ],
+      },
+      {
+        title: "Process",
+        items: [
+          "Requirements review and screen breakdown",
+          "Component planning with implementation priorities",
+          "Fast iteration through previewable milestones",
+          "Feedback and revision loops with stakeholders",
+          "Cross-browser QA before handoff",
+          "Release support during deployment",
+        ],
+      },
+      {
+        title: "Deliverables",
+        items: [
+          "Production-ready React interface",
+          "Reusable UI components and page templates",
+          "Integrated frontend codebase",
+          "Handoff notes for ongoing development",
+          "Responsive and QA signoff updates",
+          "Short post-release support",
+        ],
+      },
+    ],
   },
   {
     title: "Design & Brand Assets",
@@ -146,6 +251,41 @@ export const defaultServices = [
     featured: true,
     categoryTitle: "Design",
     visible: true,
+    detailTabs: [
+      {
+        title: "Included",
+        items: [
+          "Logo and brand asset design",
+          "Social, poster, and deck creatives",
+          "Layout and hierarchy refinement",
+          "Visual system recommendations",
+          "Presentation-ready file preparation",
+          "Revision support within scope",
+        ],
+      },
+      {
+        title: "Process",
+        items: [
+          "Brief alignment on audience and visual direction",
+          "Concept exploration and reference gathering",
+          "Design execution with feedback checkpoints",
+          "Refinement rounds on selected directions",
+          "Final review for consistency and clarity",
+          "Packaging for delivery and reuse",
+        ],
+      },
+      {
+        title: "Deliverables",
+        items: [
+          "Final approved design assets",
+          "Editable source files where applicable",
+          "Exported web and print-ready formats",
+          "Basic usage guidance for the team",
+          "Organized handoff package",
+          "Support for minor launch-ready changes",
+        ],
+      },
+    ],
   },
   {
     title: "Content & Writing",
@@ -156,6 +296,41 @@ export const defaultServices = [
     featured: true,
     categoryTitle: "Writing & Content",
     visible: true,
+    detailTabs: [
+      {
+        title: "Included",
+        items: [
+          "Resume, profile, or website content writing",
+          "ATS-aware structuring and editing support",
+          "Messaging clarity improvements",
+          "Tone alignment for the target audience",
+          "Proofreading and cleanup",
+          "Revision support on approved drafts",
+        ],
+      },
+      {
+        title: "Process",
+        items: [
+          "Input collection on goals, role, or brand context",
+          "Draft creation with structure recommendations",
+          "Review round for tone and content fit",
+          "Refinement based on feedback",
+          "Final polish for grammar and clarity",
+          "Handoff of approved copy",
+        ],
+      },
+      {
+        title: "Deliverables",
+        items: [
+          "Final written copy in editable format",
+          "Optimized resume or profile sections",
+          "Ready-to-publish website or brand messaging",
+          "Suggested headlines or supporting variants",
+          "Clean final version with revisions applied",
+          "Usage-ready documentation or notes",
+        ],
+      },
+    ],
   },
   {
     title: "AI Enablement",
@@ -166,6 +341,41 @@ export const defaultServices = [
     featured: true,
     categoryTitle: "AI-Based Services",
     visible: true,
+    detailTabs: [
+      {
+        title: "Included",
+        items: [
+          "Prompt workflows for repeatable tasks",
+          "Chatbot or assistant setup guidance",
+          "Basic automation mapping",
+          "Use-case validation for team workflows",
+          "Knowledge or content structuring support",
+          "Practical safety and quality guardrails",
+        ],
+      },
+      {
+        title: "Process",
+        items: [
+          "Discovery on team goals and current bottlenecks",
+          "Workflow selection for high-value automation",
+          "Prototype setup and prompt refinement",
+          "Review cycles with real usage feedback",
+          "Documentation for repeatable execution",
+          "Rollout guidance for the team",
+        ],
+      },
+      {
+        title: "Deliverables",
+        items: [
+          "Working prompt kit or assistant setup",
+          "Automation or chatbot configuration notes",
+          "Usage guidance for team adoption",
+          "Recommended safeguards and escalation rules",
+          "Editable documentation for future updates",
+          "Initial support after implementation",
+        ],
+      },
+    ],
   },
 ]
 
@@ -173,8 +383,16 @@ export const defaultProjects = [
   {
     name: "Global Secure Layer X",
     description: "Security-focused website with clear service messaging and fast load times.",
+    domain: "IT Services",
+    badgeLabel: "Security",
+    accent: "green",
+    icon: "ShieldCheck",
+    summary:
+      "Role-based access and reporting for multi-location enterprise teams with audit trail logging and compliance documentation.",
+    includes: ["Role-based access control", "Audit trail logging", "Compliance documentation"],
     industry: "Cybersecurity",
     outcome: "Improved credibility and lead clarity for a security services brand.",
+    idealFor: "Teams preparing for audits or enterprise requirements",
     stack: ["React", "Node.js"],
     featured: true,
     link: "https://globalsecurelayerx.in/",
@@ -182,8 +400,16 @@ export const defaultProjects = [
   {
     name: "Unicus Clothing",
     description: "Modern e-commerce storefront with clean merchandising and mobile-first UI.",
+    domain: "E-Commerce",
+    badgeLabel: "Retail",
+    accent: "amber",
+    icon: "LayoutPanelTop",
+    summary:
+      "Internal dashboard replacing a spreadsheet workflow for order tracking, billing reconciliation, and delivery health monitoring.",
+    includes: ["Order management", "Billing reconciliation", "Delivery tracking"],
     industry: "Apparel & Retail",
     outcome: "Improved product discovery and a smoother shopping experience.",
+    idealFor: "Retail teams needing visibility across orders and finance",
     stack: ["React", "Node.js"],
     featured: true,
     link: "https://unicusclothing.com/",
@@ -191,8 +417,16 @@ export const defaultProjects = [
   {
     name: "Operations Hub",
     description: "Internal dashboard to track projects, billing, and delivery health.",
+    domain: "Product Engineering",
+    badgeLabel: "Core",
+    accent: "blue",
+    icon: "Monitor",
+    summary:
+      "Operational control center for project delivery, billing visibility, and internal reporting across active accounts.",
+    includes: ["Project tracking", "Finance visibility", "Ops reporting"],
     industry: "Professional services",
     outcome: "Improved visibility for delivery and finance teams.",
+    idealFor: "Ops teams that need one shared view of delivery health",
     stack: ["React", "Node.js", "MongoDB"],
     featured: true,
     link: "https://example.com",
@@ -200,8 +434,16 @@ export const defaultProjects = [
   {
     name: "Client Intake Portal",
     description: "Secure onboarding flow with automated handoffs and status tracking.",
+    domain: "Product Engineering",
+    badgeLabel: "Workflow",
+    accent: "pink",
+    icon: "Workflow",
+    summary:
+      "Secure onboarding flow with automated handoffs, intake validation, and status tracking for sales and delivery teams.",
+    includes: ["Intake automation", "Status tracking", "Secure handoffs"],
     industry: "B2B SaaS",
     outcome: "Faster intake and consistent handoffs for sales and delivery.",
+    idealFor: "Teams reducing friction between sales and delivery",
     stack: ["React", "Express", "MongoDB"],
     featured: true,
     link: "https://example.com",
@@ -209,8 +451,16 @@ export const defaultProjects = [
   {
     name: "Service Management Suite",
     description: "Role-based access and reporting for multi-location teams.",
+    domain: "Infrastructure & Scale",
+    badgeLabel: "Migration",
+    accent: "purple",
+    icon: "Cloud",
+    summary:
+      "Service operations suite with reporting, role control, and environment cleanup for distributed delivery teams.",
+    includes: ["Architecture redesign", "Zero-downtime cutover", "Cost monitoring setup"],
     industry: "Field services",
     outcome: "Cleaner reporting and clearer accountability across locations.",
+    idealFor: "Businesses reducing technical debt and infrastructure costs",
     stack: ["React", "Node.js"],
     featured: false,
     link: "https://example.com",
@@ -321,22 +571,123 @@ export const defaultSiteContent = {
   },
   contact: {
     heroTitle: "Tell us about your project",
-    heroSubtitle: "Share your goals and timelines. We will reply with clear next steps.",
+    heroSubtitle:
+      "Share what you are building and what success looks like. We will reply with clear next steps, usually within one business day.",
+    trustPoints: [
+      "Replies within one business day",
+      "No commitment required",
+      "Clear scope before we start",
+    ],
+    formTitle: "Project inquiry",
+    formStatusLabel: "Accepting projects",
+    serviceFieldLabel: "Service needed",
+    directTitle: "Direct contact",
     email: "hello@techservices.agency",
     whatsappUrl: "https://wa.me/1234567890",
+    linkedinUrl: "",
+    linkedinLabel: "VUN Tech",
     locationText: "We are based in the US and work remotely.",
+    nextStepsTitle: "What happens next",
     nextSteps: [
-      "We review your request.",
-      "We confirm scope and priorities.",
-      "You get a clear plan and timeline.",
+      "We review your request and understand the brief.",
+      "We confirm scope, priorities, and any open questions.",
+      "You get clear next steps for moving forward.",
     ],
+    requirementsTitle: "What we need from you",
     requirements: [
-      "A short description of the project.",
-      "Expected deadline or milestone.",
-      "Current links, docs, or references.",
+      "A short description of the project and what success looks like.",
+      "Any existing links, docs, references, or technical context.",
+      "Optional files that help us understand the work faster.",
     ],
+    attachmentHint: "Optional upload: PDF, DOCX, or JPG up to 5MB.",
+    linkFieldLabel: "Reference link",
   },
   home: {
+    hero_title: "Build Secure Software That Scales Your Business",
+    hero_subtitle: "Modern Software • AI Solutions • Cloud Infrastructure",
+    hero_description:
+      "We help startups and businesses design, build, and secure high-performance digital products.",
+    hero_primary_button_text: "Get a Quote",
+    hero_primary_button_link: "/contact",
+    hero_secondary_button_text: "View Services",
+    hero_secondary_button_link: "/services",
+    brand_accent_color: "#2F6BFF",
+    trusted_badges: [
+      "Startups",
+      "Small Businesses",
+      "Creators",
+      "Local Enterprises",
+      "Early Partners",
+    ],
+    why_choose_items: [
+      {
+        icon: "Workflow",
+        title: "Fast Delivery",
+        description: "Rapid development cycles without compromising quality",
+      },
+      {
+        icon: "Sparkles",
+        title: "Startup-Friendly Pricing",
+        description: "Affordable solutions designed for growing businesses",
+      },
+      {
+        icon: "Code2",
+        title: "Modern Tech Stack",
+        description: "Built using latest secure and scalable technologies",
+      },
+      {
+        icon: "BadgeCheck",
+        title: "Direct Expert Support",
+        description: "Work directly with developers, not middlemen",
+      },
+      {
+        icon: "ShieldCheck",
+        title: "Secure by Design",
+        description: "Security integrated from day one",
+      },
+    ],
+    stats: [
+      { value: "20+", label: "Projects Delivered" },
+      { value: "10+", label: "Technologies Used" },
+      { value: "24/7", label: "Support" },
+      { value: "Startup-Friendly", label: "Pricing" },
+    ],
     heroCards: [],
+    trustLabel: "Trusted by teams building real products -",
+    trustLogos: ["Client logo", "Client logo", "Client logo", "Client logo"],
+    showTestimonials: true,
+    testimonials: [
+      {
+        quote:
+          "The team kept delivery calm, structured, and transparent from start to finish.",
+        name: "Operations Lead",
+        role: "Multi-location services business",
+      },
+      {
+        quote:
+          "We got cleaner reporting, better visibility, and a product our team actually enjoys using.",
+        name: "Founder",
+        role: "E-commerce brand",
+      },
+      {
+        quote:
+          "Their execution felt senior from day one. Clear scope, solid communication, and no chaos.",
+        name: "Product Manager",
+        role: "Internal tools team",
+      },
+    ],
+  },
+  work: {
+    heroTitle: "Case-ready work, no hype",
+    heroSubtitle:
+      "A sample of recent delivery across product, operations, and internal tooling. Each engagement focuses on clarity and long-term stability.",
+    allProjectsLabel: "All projects",
+    ctaTitle: "Want to be our next case study?",
+    ctaSubtitle:
+      "Every project starts with a scoping conversation. No commitment required.",
+    primaryCtaLabel: "Start a project",
+    primaryCtaUrl: "/contact",
+    secondaryCtaLabel: "View services",
+    secondaryCtaUrl: "/services",
   },
 }

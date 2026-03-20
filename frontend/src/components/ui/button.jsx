@@ -5,19 +5,22 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ring-offset-sand",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[11px] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ring-offset-sand",
   {
     variants: {
       variant: {
-        default: "bg-ink text-sand hover:bg-moss hover:text-white",
-        outline: "border border-ink text-ink hover:border-moss hover:text-moss",
+        default:
+          "bg-[#0f172a] text-white hover:bg-[var(--accent-color)] hover:shadow-[0_14px_30px_var(--accent-glow)]",
+        outline:
+          "border border-[#cbd5e1] bg-white text-ink hover:border-[var(--accent-color)] hover:text-[var(--accent-color)]",
         ghost: "text-ink hover:bg-fog",
-        muted: "bg-fog text-ink hover:bg-sand",
+        muted:
+          "bg-[var(--accent-soft)] text-[var(--accent-color)] hover:bg-[var(--accent-soft-strong)]",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-6",
+        sm: "h-9 rounded-[10px] px-3",
+        lg: "h-11 rounded-[11px] px-6",
       },
     },
     defaultVariants: {

@@ -1,6 +1,9 @@
 import dotenv from "dotenv"
 import express from "express"
 import { z } from "zod"
+import multer from "multer"
+import fs from "fs/promises"
+import path from "path"
 import { Contact } from "../models/Contact.js"
 import { Service } from "../models/Service.js"
 import { Project } from "../models/Project.js"
@@ -46,13 +49,56 @@ const mailTransporter =
 const adminInbox = process.env.MAIL_TO || process.env.SMTP_USER || ""
 const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || ""
 
+const contactUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+    ]
+    if (!allowed.includes(file.mimetype)) {
+      const error = new Error("Only PDF, DOCX, and JPG files are allowed")
+      error.status = 400
+      return cb(error)
+    }
+    cb(null, true)
+  },
+})
+
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120),
   email: z.string().trim().email("Please enter a valid email address"),
   phone: z.string().trim().min(7, "Please enter a valid phone number").max(30),
   company: z.string().trim().max(120).optional().or(z.literal("")),
+  serviceNeeded: z.string().trim().max(140).optional().or(z.literal("")),
+  referenceLink: z
+    .string()
+    .trim()
+    .max(500)
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || /^https?:\/\//i.test(value), {
+      message: "Please enter a valid link",
+    }),
   message: z.string().trim().min(10, "Please share a few project details").max(2000),
 })
+
+async function saveContactAttachment(file) {
+  if (!file) {
+    return { attachmentUrl: "", attachmentName: "" }
+  }
+  const uploadsDir = path.join(process.cwd(), "uploads", "contact")
+  await fs.mkdir(uploadsDir, { recursive: true })
+  const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "-")
+  const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${safeName}`
+  await fs.writeFile(path.join(uploadsDir, fileName), file.buffer)
+  return {
+    attachmentUrl: `/uploads/contact/${fileName}`,
+    attachmentName: file.originalname,
+  }
+}
 
 async function sendContactEmails(payload) {
   if (!mailTransporter || !adminInbox || !mailFrom) {
@@ -74,6 +120,9 @@ async function sendContactEmails(payload) {
         `Email: ${payload.email}`,
         `Phone: ${payload.phone}`,
         `Company: ${payload.company || "Not provided"}`,
+        `Service needed: ${payload.serviceNeeded || "Not provided"}`,
+        `Reference link: ${payload.referenceLink || "Not provided"}`,
+        `Attachment: ${payload.attachmentUrl || "Not provided"}`,
         "",
         "Message:",
         payload.message,
@@ -105,6 +154,8 @@ async function sendContactEmails(payload) {
           <ul>
             <li><strong>Phone:</strong> ${payload.phone}</li>
             <li><strong>Company:</strong> ${payload.company || "Not provided"}</li>
+            <li><strong>Service needed:</strong> ${payload.serviceNeeded || "Not provided"}</li>
+            <li><strong>Reference link:</strong> ${payload.referenceLink || "Not provided"}</li>
           </ul>
           <p><strong>Project details:</strong></p>
           <p>${payload.message.replace(/\n/g, "<br />")}</p>
@@ -122,22 +173,33 @@ function queueContactEmails(payload) {
   })
 }
 
-router.post("/contact", async (req, res, next) => {
+router.post("/contact", contactUpload.single("attachment"), async (req, res, next) => {
   try {
     const payload = contactSchema.parse(req.body)
+    const attachment = await saveContactAttachment(req.file)
     const contact = await Contact.create({
       name: payload.name,
       email: payload.email,
       phone: payload.phone,
       company: payload.company || "",
+      serviceNeeded: payload.serviceNeeded || "",
+      referenceLink: payload.referenceLink || "",
+      attachmentUrl: attachment.attachmentUrl,
+      attachmentName: attachment.attachmentName,
       message: payload.message,
     })
     res.status(201).json({ id: contact._id })
-    queueContactEmails(payload)
+    queueContactEmails({
+      ...payload,
+      attachmentUrl: attachment.attachmentUrl,
+    })
   } catch (error) {
     console.error("Contact error:", error)
     if (error?.issues) {
       return res.status(400).json({ message: error.issues[0]?.message || "Invalid input" })
+    }
+    if (error?.status === 400) {
+      return res.status(400).json({ message: error.message || "Invalid attachment" })
     }
     return res.status(500).json({ message: "Contact submission failed" })
   }
@@ -324,6 +386,15 @@ router.get("/content/home", async (req, res, next) => {
   try {
     const content = await SiteContent.findOne({ key: "default" })
     res.json(content?.home || null)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/content/work", async (req, res, next) => {
+  try {
+    const content = await SiteContent.findOne({ key: "default" })
+    res.json(content?.work || null)
   } catch (error) {
     next(error)
   }

@@ -6,9 +6,9 @@ const Badge = React.forwardRef(({ className, variant = "default", ...props }, re
     ref={ref}
     className={cn(
       "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium",
-      variant === "default" && "bg-fog text-ink",
-      variant === "outline" && "border border-fog text-slate",
-      variant === "success" && "bg-moss/10 text-moss",
+      variant === "default" && "bg-[#dbeafe] text-[#1d4ed8]",
+      variant === "outline" && "border border-[#bfdbfe] bg-white text-[#475569]",
+      variant === "success" && "bg-[#dbeafe] text-[#1d4ed8]",
       className
     )}
     {...props}

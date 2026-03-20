@@ -1,41 +1,296 @@
 import { Link } from "react-router-dom"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Container } from "@/components/layout/Container"
 import { featuredServices, defaultProjects, values } from "@/data/content"
-import { apiFetch, API_URL } from "@/lib/api"
-import { OptimizedImage } from "@/components/OptimizedImage"
+import { apiFetch } from "@/lib/api"
 import {
-  GradientOrbs,
-  SectionBadge,
-  HeroGraphic,
-  StatGraphic,
-} from "@/components/Decorations"
-import { Sparkles, ShieldCheck, Layers } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+  ArrowRight,
+  BadgeCheck,
+  Check,
+  Code2,
+  Globe,
+  Lock,
+  Monitor,
+  PenTool,
+  ScanSearch,
+  ShieldCheck,
+  Sparkles,
+  Workflow,
+} from "lucide-react"
+
+const featureTags = [
+  "Modern UX",
+  "Reliable builds",
+  "Scalable stacks",
+  "Secure by design",
+]
+
+const DEFAULT_ACCENT_COLOR = "#2F6BFF"
+
+const defaultHomeContent = {
+  hero_title: "Build Secure Software That Scales Your Business",
+  hero_subtitle: "Modern Software • AI Solutions • Cloud Infrastructure",
+  hero_description:
+    "We help startups and businesses design, build, and secure high-performance digital products.",
+  hero_primary_button_text: "Get a Quote",
+  hero_primary_button_link: "/contact",
+  hero_secondary_button_text: "View Services",
+  hero_secondary_button_link: "/services",
+  brand_accent_color: DEFAULT_ACCENT_COLOR,
+  trusted_badges: [
+    "Startups",
+    "Small Businesses",
+    "Creators",
+    "Local Enterprises",
+    "Early Partners",
+  ],
+  why_choose_items: [
+    {
+      icon: "Workflow",
+      title: "Fast Delivery",
+      description: "Rapid development cycles without compromising quality",
+    },
+    {
+      icon: "Sparkles",
+      title: "Startup-Friendly Pricing",
+      description: "Affordable solutions designed for growing businesses",
+    },
+    {
+      icon: "Code2",
+      title: "Modern Tech Stack",
+      description: "Built using latest secure and scalable technologies",
+    },
+    {
+      icon: "BadgeCheck",
+      title: "Direct Expert Support",
+      description: "Work directly with developers, not middlemen",
+    },
+    {
+      icon: "ShieldCheck",
+      title: "Secure by Design",
+      description: "Security integrated from day one",
+    },
+  ],
+  stats: [
+    { value: "20+", label: "Projects Delivered" },
+    { value: "10+", label: "Technologies Used" },
+    { value: "24/7", label: "Support" },
+    { value: "Startup-Friendly", label: "Pricing" },
+  ],
+}
+
+const fallbackTestimonials = [
+  {
+    quote:
+      "The team kept delivery calm, structured, and transparent from start to finish.",
+    name: "Operations Lead",
+    role: "Multi-location services business",
+  },
+  {
+    quote:
+      "We got cleaner reporting, better visibility, and a product our team actually enjoys using.",
+    name: "Founder",
+    role: "E-commerce brand",
+  },
+  {
+    quote:
+      "Their execution felt senior from day one. Clear scope, solid communication, and no chaos.",
+    name: "Product Manager",
+    role: "Internal tools team",
+  },
+]
+
+const serviceVisuals = [
+  {
+    icon: Monitor,
+    iconWrap: "bg-[#eff6ff] text-[#2563eb]",
+    border: "border-[#dbeafe] bg-white",
+    badge: null,
+    short: "Fast, clean, scalable builds",
+  },
+  {
+    icon: ShieldCheck,
+    iconWrap: "bg-[#eff6ff] text-[#2563eb]",
+    border: "border-[#3b82f6] bg-[#fafcff]",
+    badge: { label: "New", className: "bg-[#dbeafe] text-[#1d4ed8]" },
+    short: "Protect systems & data",
+  },
+  {
+    icon: PenTool,
+    iconWrap: "bg-[#eff6ff] text-[#1d4ed8]",
+    border: "border-[#dbeafe] bg-white",
+    badge: null,
+    short: "Interfaces users love",
+  },
+  {
+    icon: Monitor,
+    iconWrap: "bg-[#eff6ff] text-[#2563eb]",
+    border: "border-[#dbeafe] bg-white",
+    badge: null,
+    short: "Focused, practical delivery",
+  },
+]
+
+const securityTiles = [
+  {
+    icon: ShieldCheck,
+    title: "Threat Detection",
+    subtitle: "Real-time monitoring",
+  },
+  {
+    icon: Lock,
+    title: "Data Protection",
+    subtitle: "Encrypted at every point",
+  },
+  {
+    icon: ScanSearch,
+    title: "Security Audit",
+    subtitle: "Full vulnerability scan",
+  },
+  {
+    icon: BadgeCheck,
+    title: "Compliance",
+    subtitle: "GDPR & ISO ready",
+  },
+]
+
+const iconMap = {
+  Monitor,
+  ShieldCheck,
+  PenTool,
+  Lock,
+  ScanSearch,
+  BadgeCheck,
+  Workflow,
+  Sparkles,
+  Code2,
+  Globe,
+}
+
+function mergeWithFallback(primary, fallback, count, key) {
+  const next = []
+  const seen = new Set()
+
+  ;[...(primary || []), ...(fallback || [])].forEach((item) => {
+    if (!item) return
+    const value = key(item)
+    if (!value || seen.has(value) || next.length >= count) return
+    seen.add(value)
+    next.push(item)
+  })
+
+  return next
+}
+
+function resolveIcon(name) {
+  return iconMap[name] || ShieldCheck
+}
+
+function splitHeadline(title = "") {
+  const parts = title.trim().split(/\s+/).filter(Boolean)
+  if (parts.length <= 2) {
+    return {
+      prefix: parts[0] || "",
+      highlight: parts.slice(1).join(" ") || parts[0] || "",
+    }
+  }
+
+  return {
+    prefix: parts.slice(0, -2).join(" "),
+    highlight: parts.slice(-2).join(" "),
+  }
+}
+
+function SmartLink({ to, className, children }) {
+  if (!to) {
+    return <span className={className}>{children}</span>
+  }
+
+  if (/^(https?:)?\/\//.test(to)) {
+    return (
+      <a href={to} target="_blank" rel="noreferrer" className={className}>
+        {children}
+      </a>
+    )
+  }
+
+  return (
+    <Link to={to} className={className}>
+      {children}
+    </Link>
+  )
+}
+
+function BrowserMockup({ caption }) {
+  const codeLines = [
+    "const deploy = async () => {",
+    "  await runSecurityChecks();",
+    "  await shipFeature('homepage');",
+    "  return reportStatus('stable');",
+    "}",
+  ]
+
+  return (
+    <div className="overflow-hidden rounded-[18px] border border-[#dbeafe] bg-white shadow-[0_24px_60px_rgba(37,99,235,0.10)]">
+      <div className="flex items-center gap-2 rounded-t-[18px] bg-[#14213d] px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#3b82f6]" />
+        <div className="ml-2 h-2.5 flex-1 rounded-full bg-white/10" />
+        <div className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-medium text-[#bfdbfe]">
+          live typing
+        </div>
+      </div>
+      <div className="rounded-b-[18px] bg-[#0f172a] px-4 py-5">
+        <div className="rounded-[14px] border border-white/10 bg-[#091121]/90 p-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="mb-3 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[#60a5fa]">
+            <span>deploy.ts</span>
+            <span>auto-save enabled</span>
+          </div>
+          <div className="space-y-2 font-mono text-[12px] leading-6 text-[#dbeafe]">
+            {codeLines.map((line, index) => (
+              <div
+                key={line}
+                className="overflow-hidden whitespace-nowrap border-r-2 border-[#60a5fa] pr-1 animate-[typing_4.8s_steps(40,end)_infinite,blink_0.9s_step-end_infinite]"
+                style={{
+                  width: `${line.length + 1}ch`,
+                  animationDelay: `${index * 0.35}s, ${index * 0.35}s`,
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-[#1e3a8a] bg-[#0f1b33] px-3 py-2 text-[11px] text-[#93c5fd]">
+              build ok
+            </div>
+            <div className="rounded-xl border border-[#1e3a8a] bg-[#0f1b33] px-3 py-2 text-[11px] text-[#93c5fd]">
+              tests pass
+            </div>
+            <div className="rounded-xl border border-[#1e3a8a] bg-[#0f1b33] px-3 py-2 text-[11px] text-[#93c5fd]">
+              secure
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-white px-4 py-3 text-[12px] text-[#64748b]">
+        {caption || "Clarity-driven product development."}
+      </div>
+    </div>
+  )
+}
 
 export function Home() {
+  const pageRef = useRef(null)
   const [services, setServices] = useState(featuredServices)
   const [projects, setProjects] = useState(defaultProjects)
-  const storedHome =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("homeHeroCards") || "null")
-      : null
   const [homeContent, setHomeContent] = useState({
-    heroCards: Array.isArray(storedHome) ? storedHome : [],
+    ...defaultHomeContent,
+    heroCards: [],
+    showTestimonials: true,
+    testimonials: [],
   })
-  const [offerOpen, setOfferOpen] = useState(false)
-  const [activeOffer, setActiveOffer] = useState(null)
-  const [offerForm, setOfferForm] = useState({ name: "", email: "", phone: "" })
-  const [offerStatus, setOfferStatus] = useState({ type: "idle", message: "" })
-
-  const offers = [
-    { id: "resume", label: "Resume", price: 199, color: "bg-emerald-600 text-white" },
-    { id: "portfolio", label: "Portfolio Website", price: 1999, color: "bg-blue-600 text-white" },
-    { id: "gift", label: " Gift Page", price: 999, color: "bg-pink-300 text-ink" },
-  ]
 
   useEffect(() => {
     apiFetch("/api/services")
@@ -46,210 +301,367 @@ export function Home() {
         }
       })
       .catch(() => {})
+
     apiFetch("/api/projects")
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setProjects(data)
+        if (Array.isArray(data) && data.length > 0) {
+          setProjects(data)
+        }
       })
       .catch(() => {})
+
     apiFetch("/api/content/home")
       .then((data) => {
-        if (data?.heroCards?.length) {
-          setHomeContent({ heroCards: data.heroCards })
-          localStorage.setItem("homeHeroCards", JSON.stringify(data.heroCards))
+        if (data) {
+          setHomeContent({
+            hero_title: data.hero_title || defaultHomeContent.hero_title,
+            hero_subtitle: data.hero_subtitle || defaultHomeContent.hero_subtitle,
+            hero_description: data.hero_description || defaultHomeContent.hero_description,
+            hero_primary_button_text:
+              data.hero_primary_button_text || defaultHomeContent.hero_primary_button_text,
+            hero_primary_button_link:
+              data.hero_primary_button_link || defaultHomeContent.hero_primary_button_link,
+            hero_secondary_button_text:
+              data.hero_secondary_button_text || defaultHomeContent.hero_secondary_button_text,
+            hero_secondary_button_link:
+              data.hero_secondary_button_link || defaultHomeContent.hero_secondary_button_link,
+            brand_accent_color:
+              data.brand_accent_color || defaultHomeContent.brand_accent_color,
+            trusted_badges:
+              Array.isArray(data.trusted_badges) && data.trusted_badges.filter(Boolean).length
+                ? data.trusted_badges.filter(Boolean)
+                : defaultHomeContent.trusted_badges,
+            why_choose_items:
+              Array.isArray(data.why_choose_items) && data.why_choose_items.length
+                ? data.why_choose_items
+                : defaultHomeContent.why_choose_items,
+            stats:
+              Array.isArray(data.stats) && data.stats.length
+                ? data.stats
+                : defaultHomeContent.stats,
+            heroCards: Array.isArray(data.heroCards) ? data.heroCards : [],
+            showTestimonials: data.showTestimonials ?? true,
+            testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
+          })
         }
       })
       .catch(() => {})
   }, [])
 
-  const resolveImageUrl = (url) => {
-    if (!url) return ""
-    if (url.startsWith("http") || url.startsWith("data:")) return url
-    if (url.startsWith("/uploads/")) return `${API_URL}${url}`
-    return url
-  }
+  useEffect(() => {
+    const scope = pageRef.current
+    if (!scope || typeof IntersectionObserver === "undefined") return undefined
 
-  const openOffer = (offer) => {
-    setActiveOffer(offer)
-    setOfferStatus({ type: "idle", message: "" })
-    setOfferOpen(true)
-  }
-
-  const handleOfferPay = async (event) => {
-    event.preventDefault()
-    if (!activeOffer) return
-    if (!offerForm.name.trim() || !offerForm.email.trim() || !offerForm.phone.trim()) {
-      setOfferStatus({ type: "error", message: "Please complete all fields." })
-      return
-    }
-    if (!/^\S+@\S+\.\S+$/.test(offerForm.email)) {
-      setOfferStatus({ type: "error", message: "Enter a valid email." })
-      return
-    }
-    if (!window.Razorpay) {
-      setOfferStatus({ type: "error", message: "Payment system not loaded." })
-      return
-    }
-
-    try {
-      setOfferStatus({ type: "loading", message: "Creating payment..." })
-      const order = await apiFetch("/api/payments/order", {
-        method: "POST",
-        body: JSON.stringify({
-          amount: activeOffer.price * 100,
-          currency: "INR",
-          product: activeOffer.label,
-          name: offerForm.name,
-          email: offerForm.email,
-          phone: offerForm.phone,
-        }),
-      })
-
-      const options = {
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: "Tech Services Agency",
-        description: activeOffer.label,
-        order_id: order.orderId,
-        prefill: {
-          name: offerForm.name,
-          email: offerForm.email,
-          contact: offerForm.phone,
-        },
-        handler: async (response) => {
-          try {
-            await apiFetch("/api/payments/verify", {
-              method: "POST",
-              body: JSON.stringify({
-                orderId: response.razorpay_order_id,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-              }),
-            })
-            setOfferStatus({
-              type: "success",
-              message: "Payment successful. Confirmation sent.",
-            })
-          } catch (error) {
-            setOfferStatus({
-              type: "error",
-              message: error.message || "Verification failed.",
-            })
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible")
+            observer.unobserve(entry.target)
           }
-        },
-        theme: { color: "#2563eb" },
-      }
+        })
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
+    )
 
-      const rzp = new window.Razorpay(options)
-      rzp.open()
-      setOfferStatus({ type: "idle", message: "" })
-    } catch (error) {
-      setOfferStatus({ type: "error", message: error.message || "Payment failed." })
+    scope.querySelectorAll("[data-reveal]").forEach((element) => observer.observe(element))
+
+    return () => observer.disconnect()
+  }, [services, projects, homeContent])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const accent = homeContent.brand_accent_color || DEFAULT_ACCENT_COLOR
+    root.style.setProperty("--accent-color", accent)
+
+    return () => {
+      root.style.setProperty("--accent-color", DEFAULT_ACCENT_COLOR)
     }
-  }
+  }, [homeContent.brand_accent_color])
+
+  const heroServices = mergeWithFallback(services, featuredServices, 3, (item) => item.title)
+  const serviceCards = mergeWithFallback(services, featuredServices, 4, (item) => item.title)
+  const selectedProjects = mergeWithFallback(
+    projects.some((item) => item.featured) ? projects.filter((item) => item.featured) : projects,
+    defaultProjects,
+    2,
+    (item) => item.name
+  )
+  const testimonials = (homeContent.testimonials || []).filter(
+    (item) => item?.quote || item?.name || item?.role
+  ).length
+    ? homeContent.testimonials.filter((item) => item?.quote || item?.name || item?.role)
+    : fallbackTestimonials
+  const trustedBadges = (homeContent.trusted_badges || []).filter(Boolean).length
+    ? homeContent.trusted_badges.filter(Boolean)
+    : defaultHomeContent.trusted_badges
+  const whyChooseItems = (homeContent.why_choose_items || []).filter(
+    (item) => item?.title || item?.description
+  ).length
+    ? homeContent.why_choose_items.filter((item) => item?.title || item?.description)
+    : defaultHomeContent.why_choose_items
+  const stats = (homeContent.stats || []).filter((item) => item?.value || item?.label).length
+    ? homeContent.stats.filter((item) => item?.value || item?.label)
+    : defaultHomeContent.stats
+  const accentColor = homeContent.brand_accent_color || DEFAULT_ACCENT_COLOR
+  const headline = splitHeadline(homeContent.hero_title)
+  const accentCardShadow = useMemo(
+    () => ({ boxShadow: `0 18px 45px ${accentColor}24` }),
+    [accentColor]
+  )
 
   return (
-    <div>
-      <section className="relative overflow-hidden border-b border-fog bg-sand bg-grid">
-        <GradientOrbs />
-        <Container className="grid gap-10 py-16 md:grid-cols-[1.2fr_0.8fr] md:py-24">
-          <div className="space-y-6">
-            <SectionBadge>Tech services for growing teams</SectionBadge>
-            <h1 className="text-balance text-4xl font-semibold leading-tight md:text-5xl">
-              We build and maintain software that keeps your business moving.
+    <div
+      ref={pageRef}
+      className="bg-white"
+      style={{ "--accent-color": accentColor }}
+    >
+      <style>{`
+        @keyframes typing {
+          0%, 18% { max-width: 0; opacity: 0.65; }
+          35%, 78% { max-width: 100%; opacity: 1; }
+          100% { max-width: 100%; opacity: 1; }
+        }
+
+        @keyframes blink {
+          0%, 45% { border-color: rgba(96, 165, 250, 0.95); }
+          50%, 100% { border-color: transparent; }
+        }
+
+        @keyframes floatPanel {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        .home-reveal {
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 620ms ease, transform 620ms ease;
+        }
+
+        .home-reveal.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .hero-panel-float {
+          animation: floatPanel 6s ease-in-out infinite;
+        }
+
+        .accent-primary {
+          background: var(--accent-color);
+          box-shadow: 0 16px 40px color-mix(in srgb, var(--accent-color) 28%, transparent);
+          transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        .accent-primary:hover {
+          transform: translateY(-2px);
+          color: #ffffff;
+          box-shadow: 0 18px 46px color-mix(in srgb, var(--accent-color) 34%, transparent);
+        }
+
+        .accent-outline {
+          transition: transform 180ms ease, box-shadow 180ms ease, color 180ms ease, border-color 180ms ease;
+        }
+
+        .accent-outline:hover {
+          transform: translateY(-2px);
+          border-color: var(--accent-color);
+          color: var(--accent-color);
+          box-shadow: 0 12px 28px color-mix(in srgb, var(--accent-color) 18%, transparent);
+        }
+
+        .accent-pill {
+          transition: transform 180ms ease, box-shadow 180ms ease, color 180ms ease, border-color 180ms ease;
+        }
+
+        .accent-pill:hover {
+          transform: translateY(-2px);
+          color: var(--accent-color);
+          border-color: color-mix(in srgb, var(--accent-color) 35%, white);
+          box-shadow: 0 12px 28px color-mix(in srgb, var(--accent-color) 14%, transparent);
+        }
+
+        .accent-card {
+          transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        }
+
+        .accent-card:hover {
+          transform: translateY(-6px);
+          border-color: color-mix(in srgb, var(--accent-color) 34%, white);
+          box-shadow: 0 18px 44px color-mix(in srgb, var(--accent-color) 15%, transparent);
+        }
+      `}</style>
+      <section className="border-b border-fog bg-white">
+        <Container className="px-4 py-12 sm:px-6 md:grid md:grid-cols-[1.02fr_0.98fr] md:py-16">
+          <div className="pr-0 md:pr-12 home-reveal" data-reveal>
+            <div
+              className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-medium"
+              style={{
+                borderColor: `${accentColor}33`,
+                backgroundColor: `${accentColor}12`,
+                color: accentColor,
+              }}
+            >
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />
+              {homeContent.hero_subtitle}
+            </div>
+
+            <h1 className="mt-7 max-w-[12ch] text-[36px] font-bold leading-[1.02] tracking-[-0.05em] text-[#0f172a] sm:text-[44px] md:text-[58px]">
+              {headline.prefix} <span style={{ color: accentColor }}>{headline.highlight}</span>
             </h1>
-            <p className="text-lg text-slate md:text-xl">
-              Clear scope, honest delivery, and reliable systems. We partner with
-              teams that want steady progress without the noise.
+
+            <p className="mt-6 max-w-[560px] text-[15px] leading-[1.85] text-[#475569] sm:text-[16px]">
+              {homeContent.hero_description}
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/contact">Contact / Get Quote</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/services">View Services</Link>
-              </Button>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <SmartLink
+                to={homeContent.hero_primary_button_link}
+                className="accent-primary inline-flex items-center gap-2 rounded-[11px] px-6 py-[13px] text-[14px] font-medium text-white"
+              >
+                {homeContent.hero_primary_button_text} <ArrowRight className="h-4 w-4" />
+              </SmartLink>
+              <SmartLink
+                to={homeContent.hero_secondary_button_link}
+                className="accent-outline inline-flex items-center rounded-[11px] border border-[#cbd5e1] bg-white px-6 py-[13px] text-[14px] font-medium text-[#0f172a]"
+              >
+                {homeContent.hero_secondary_button_text}
+              </SmartLink>
             </div>
-            <div className="rounded-2xl border border-fog bg-white p-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-ink/60">
-                Exclusive offers
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                {offers.map((offer) => (
-                  <button
-                    key={offer.id}
-                    type="button"
-                    onClick={() => openOffer(offer)}
-                    className={`rounded-xl px-4 py-3 text-left transition-transform hover:-translate-y-1 ${offer.color}`}
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {heroServices.map((service, index) => {
+                const visual = serviceVisuals[index] || serviceVisuals[0]
+                const Icon = visual.icon
+
+                return (
+                  <article
+                    key={service.title}
+                    className="accent-card rounded-[15px] border border-fog bg-white px-6 py-4 shadow-[0_10px_30px_rgba(15,23,42,0.04)]"
                   >
-                    <div className="text-xs uppercase tracking-wide">
-                      {offer.label}
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div
+                        className="flex h-9 w-9 items-center justify-center rounded-[10px]"
+                        style={{
+                          backgroundColor: `${accentColor}12`,
+                          color: accentColor,
+                        }}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      {visual.badge ? (
+                        <span
+                          className="rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wide"
+                          style={{
+                            backgroundColor: `${accentColor}14`,
+                            color: accentColor,
+                          }}
+                        >
+                          {visual.badge.label}
+                        </span>
+                      ) : null}
                     </div>
-                    <div className="text-lg font-semibold">INR {offer.price}</div>
-                    <div className="mt-2 text-xs underline">Get this offer</div>
-                  </button>
-                ))}
-              </div>
+                    <div className="max-w-[14ch] text-[15px] font-semibold leading-[1.3] text-[#0f172a]">
+                      {service.title}
+                    </div>
+                    <div className="mt-2 pr-1 text-[12.5px] leading-[1.65] text-[#64748b]">
+                      {service.description || visual.short}
+                    </div>
+                  </article>
+                )
+              })}
             </div>
-            <div className="grid gap-3 pt-4 text-sm text-slate sm:grid-cols-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-moss" />
-                Modern UX
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-moss" />
-                Reliable builds
-              </div>
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-moss" />
-                Scalable stacks
-              </div>
+
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3">
+              {featureTags.map((tag) => (
+                <div key={tag} className="flex items-center gap-2 text-[12.5px] text-[#64748b]">
+                  <span
+                    className="flex h-4 w-4 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: `${accentColor}14`,
+                      color: accentColor,
+                    }}
+                  >
+                    <Check className="h-3 w-3" />
+                  </span>
+                  {tag}
+                </div>
+              ))}
             </div>
           </div>
-          <div className="space-y-4">
-            {homeContent.heroCards?.length >= 2 ? (
-              homeContent.heroCards.slice(0, 2).map((card, index) => (
+
+          <div
+            className="mt-10 border-l-0 border-fog bg-[#f8fbff] pl-0 pt-0 md:mt-0 md:border-l md:pl-8 home-reveal"
+            data-reveal
+          >
+            <div className="space-y-4">
+              <div className="hero-panel-float">
+                <BrowserMockup caption={homeContent.heroCards?.[0]?.caption} />
+              </div>
+
+              <div
+                className="rounded-[18px] bg-[#0f172a] p-5 shadow-[0_20px_45px_rgba(15,23,42,0.18)]"
+                style={accentCardShadow}
+              >
                 <div
-                  key={`hero-card-${index}`}
-                  className="rounded-2xl border border-fog bg-white p-4"
+                  className="inline-flex rounded-full px-3 py-1 text-[10px] font-medium text-white"
+                  style={{ backgroundColor: accentColor }}
                 >
-                  <div className="overflow-hidden rounded-xl bg-sand">
-                    {card.imageUrl ? (
-                      <OptimizedImage
-                        src={resolveImageUrl(card.imageUrl)}
-                        alt={`Hero ${index + 1}`}
-                        priority={index === 0}
-                        width={1200}
-                        height={675}
-                        className="h-40 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-40 w-full" />
-                    )}
-                  </div>
-                  {card.caption && (
-                    <div className="mt-2 text-xs text-slate">{card.caption}</div>
-                  )}
+                  Cybersecurity Services
                 </div>
-              ))
-            ) : (
-              <>
-                <HeroGraphic />
-                <StatGraphic />
-              </>
-            )}
-            <div className="glass-card rounded-2xl p-6 shadow-sm">
-              <div className="space-y-4 text-sm text-slate">
-                <div className="text-xs uppercase tracking-[0.2em] text-ink/60">
+                <div className="mt-4 text-[16px] font-bold text-white">
+                  Security built into every layer
+                </div>
+                <div className="mt-2 max-w-md text-[12.5px] leading-5 text-[#bfdbfe]">
+                  {homeContent.heroCards?.[1]?.caption ||
+                    "We audit, protect, and monitor your systems so threats never reach your users."}
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {securityTiles.map((tile) => {
+                    const Icon = tile.icon
+                    return (
+                      <div
+                        key={tile.title}
+                        className="rounded-[13px] border border-white/10 bg-white/5 p-3 transition-transform duration-200 hover:-translate-y-1"
+                      >
+                        <Icon className="h-4 w-4" style={{ color: accentColor }} />
+                        <div className="mt-3 text-[12px] font-medium text-white">
+                          {tile.title}
+                        </div>
+                        <div className="mt-1 text-[11px] text-[#94a3b8]">
+                          {tile.subtitle}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-[18px] border border-[#dbeafe] bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.04)]">
+                <div className="text-[9.5px] font-semibold uppercase tracking-[0.24em] text-[#9ca3af]">
                   What you can expect
                 </div>
-                <div className="space-y-3">
+                <div className="mt-4 space-y-4">
                   {values.map((value) => (
-                    <div key={value.title} className="rounded-xl bg-white p-4">
-                      <div className="text-base font-semibold text-ink">
-                        {value.title}
+                    <div key={value.title} className="flex gap-3">
+                      <span
+                        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                        style={{
+                          backgroundColor: `${accentColor}14`,
+                          color: accentColor,
+                        }}
+                      >
+                        <Check className="h-3 w-3" />
+                      </span>
+                      <div>
+                        <div className="text-[13.5px] font-semibold text-[#0f172a]">
+                          {value.title}
+                        </div>
+                        <div className="mt-1 text-[12.5px] leading-5 text-[#64748b]">
+                          {value.description}
+                        </div>
                       </div>
-                      <div className="text-sm text-slate">{value.description}</div>
                     </div>
                   ))}
                 </div>
@@ -259,137 +671,306 @@ export function Home() {
         </Container>
       </section>
 
-      <section className="border-b border-fog bg-white section-sheen bg-grid">
-        <Container className="py-14">
-          <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-3xl font-semibold">Services</h2>
-              <p className="text-slate">Focused, practical offerings.</p>
+      <section className="border-y border-fog bg-[#f8fbff]">
+        <Container className="py-6">
+          <div className="home-reveal" data-reveal>
+            <div className="text-center text-[11.5px] font-medium uppercase tracking-[0.24em] text-[#94a3b8]">
+              Trusted by growing startups and businesses
             </div>
-            <Button asChild variant="outline">
-              <Link to="/services">All services</Link>
-            </Button>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              {trustedBadges.map((badge) => (
+                <div
+                  key={badge}
+                  className="accent-pill inline-flex items-center rounded-full border border-[#dbeafe] bg-white px-4 py-2 text-[12px] font-medium text-[#334155]"
+                >
+                  {badge}
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {services.map((service) => (
-              <Card key={service.title}>
-                <CardHeader>
-                  <CardTitle>{service.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm text-slate">
-                  <p>{service.description}</p>
-                  <ul className="space-y-2 text-ink list-disc pl-4">
-                    {(service.includes || []).map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                  <p className="text-xs uppercase tracking-wide text-ink/60">
-                    Ideal for: {service.idealFor}
+        </Container>
+      </section>
+
+      <section className="bg-white py-16">
+        <Container>
+          <div className="home-reveal" data-reveal>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9ca3af]">
+              Why VUN Tech
+            </div>
+            <h2 className="mt-3 text-[30px] font-bold tracking-[-0.04em] text-[#0f172a] sm:text-[34px]">
+              Why Choose VUN Tech
+            </h2>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            {whyChooseItems.map((item, index) => {
+              const Icon = resolveIcon(item.icon)
+
+              return (
+                <article
+                  key={`${item.title}-${index}`}
+                  className="home-reveal accent-card rounded-[18px] border border-fog bg-white p-5 shadow-[0_12px_34px_rgba(15,23,42,0.04)]"
+                  data-reveal
+                >
+                  <div
+                    className="flex h-11 w-11 items-center justify-center rounded-[14px]"
+                    style={{
+                      backgroundColor: `${accentColor}12`,
+                      color: accentColor,
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="mt-4 text-[16px] font-semibold text-[#0f172a]">
+                    {item.title}
+                  </div>
+                  <p className="mt-2 text-[13px] leading-[1.75] text-[#64748b]">
+                    {item.description}
                   </p>
-                </CardContent>
-              </Card>
+                </article>
+              )
+            })}
+          </div>
+        </Container>
+      </section>
+
+      <section className="bg-[#f8fbff] py-8">
+        <Container>
+          <div className="grid gap-4 rounded-[24px] border border-fog bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] md:grid-cols-4">
+            {stats.map((item, index) => (
+              <div
+                key={`${item.value}-${item.label}-${index}`}
+                className="home-reveal rounded-[16px] border border-transparent px-2 py-3 text-center transition-all duration-200 hover:bg-[var(--accent-soft)]"
+                data-reveal
+              >
+                <div
+                  className="text-[26px] font-bold tracking-[-0.05em]"
+                  style={{ color: accentColor }}
+                >
+                  {item.value}
+                </div>
+                <div className="mt-2 text-[12px] font-medium uppercase tracking-[0.18em] text-[#64748b]">
+                  {item.label}
+                </div>
+              </div>
             ))}
           </div>
         </Container>
       </section>
 
-      <section className="relative border-b border-fog bg-sand bg-grid">
-        <GradientOrbs />
-        <Container className="py-14">
-          <div className="mb-8">
-            <h2 className="text-3xl font-semibold">Selected work</h2>
-            <p className="text-slate">
+      <section className="bg-[#f8fbff] py-16">
+        <Container>
+          <div
+            className="home-reveal mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+            data-reveal
+          >
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9ca3af]">
+                What we do
+              </div>
+              <h2 className="mt-3 text-[30px] font-bold tracking-[-0.04em] text-[#0f172a] sm:text-[34px]">
+                Services
+              </h2>
+              <p className="mt-2 text-[14px] text-[#64748b]">
+                Focused, practical offerings.
+              </p>
+            </div>
+            <Link
+              to="/services"
+              className="accent-outline inline-flex items-center gap-2 self-start rounded-[10px] border border-[#cbd5e1] bg-white px-4 py-2.5 text-[12.5px] font-medium text-[#0f172a]"
+            >
+              All services <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+            {serviceCards.map((service, index) => {
+              const visual = serviceVisuals[index] || serviceVisuals[0]
+              const Icon = visual.icon
+              const isSecurity = /security|compliance|cyber/i.test(
+                `${service.title} ${service.categoryTitle || ""}`
+              )
+
+              return (
+                <article
+                  key={service.title}
+                  className={`home-reveal accent-card min-w-[285px] rounded-[18px] border bg-white p-[24px] shadow-[0_12px_34px_rgba(15,23,42,0.04)] md:min-w-0 ${
+                    index === 3 ? "md:col-start-1" : ""
+                  } ${isSecurity ? "border-[#3b82f6]" : "border-fog"}`}
+                  data-reveal
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div
+                      className="flex h-9 w-9 items-center justify-center rounded-[10px]"
+                      style={{
+                        backgroundColor: `${accentColor}12`,
+                        color: accentColor,
+                        border: isSecurity ? `1px solid ${accentColor}` : "none",
+                      }}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    {isSecurity ? (
+                      <span
+                        className="rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wide"
+                        style={{
+                          backgroundColor: `${accentColor}14`,
+                          color: accentColor,
+                        }}
+                      >
+                        New
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-5 text-[16px] font-semibold text-[#0f172a]">
+                    {service.title}
+                  </div>
+                  <p className="mt-3 text-[13px] leading-[1.7] text-[#64748b]">
+                    {service.description}
+                  </p>
+                  <div className="mt-4 space-y-2 text-[12px] text-[#64748b]">
+                    {(service.includes || []).slice(0, 3).map((item) => (
+                      <div key={item} className="flex items-center gap-2">
+                        <span
+                          className="h-1.5 w-1.5 rounded-full"
+                          style={{ backgroundColor: accentColor }}
+                        />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    to="/services"
+                    className="mt-5 inline-flex items-center gap-1 text-[12px] font-semibold"
+                    style={{ color: accentColor }}
+                  >
+                    Learn more <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <div className="mt-5 border-t border-fog pt-4 text-[10px] uppercase tracking-[0.18em] text-[#9ca3af]">
+                    Ideal for: {service.idealFor}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </Container>
+      </section>
+
+      <section className="bg-white py-16">
+        <Container>
+          <div className="home-reveal mb-8" data-reveal>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9ca3af]">
+              Portfolio
+            </div>
+            <h2 className="mt-3 text-[30px] font-bold tracking-[-0.04em] text-[#0f172a] sm:text-[34px]">
+              Selected work
+            </h2>
+            <p className="mt-2 text-[14px] text-[#64748b]">
               Practical solutions built for real operations.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {(projects.some((p) => p.featured) ? projects.filter((p) => p.featured) : projects).map(
-              (project) => (
-                <Card key={project.name}>
-                  <CardHeader>
-                    <CardTitle>{project.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-slate">
-                    <p>{project.description}</p>
-                    {project.outcome && (
-                      <p className="text-ink">Outcome: {project.outcome}</p>
-                    )}
-                    {project.link && (
-                      <a className="text-sm text-moss" href={project.link}>
-                        View details
-                      </a>
-                    )}
-                  </CardContent>
-                </Card>
+
+          <div className="grid gap-6 md:grid-cols-2 md:justify-items-center">
+            {selectedProjects.map((project) => {
+              const isSecurity = /security|secure|cyber/i.test(
+                `${project.name} ${project.industry || ""}`
               )
-            )}
+
+              return (
+                <article
+                  key={project.name}
+                  className="home-reveal w-full max-w-[560px] rounded-[18px] border border-fog bg-white p-6 shadow-[0_12px_34px_rgba(15,23,42,0.05)] transition-transform duration-200 hover:-translate-y-1"
+                  data-reveal
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span
+                      className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide"
+                      style={{
+                        backgroundColor: `${accentColor}14`,
+                        color: accentColor,
+                      }}
+                    >
+                      {project.badgeLabel || (isSecurity ? "Security" : "Web App")}
+                    </span>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9ca3af]">
+                      {project.domain || project.industry}
+                    </div>
+                  </div>
+                  <div className="mt-4 text-[20px] font-semibold leading-[1.2] text-[#0f172a]">
+                    {project.name}
+                  </div>
+                  <p className="mt-3 text-[13px] leading-[1.75] text-[#64748b]">
+                    {project.description}
+                  </p>
+                  {project.outcome ? (
+                    <div
+                      className="mt-4 rounded-[14px] px-4 py-3 text-[12px] leading-6"
+                      style={{
+                        backgroundColor: `${accentColor}0d`,
+                        color: accentColor,
+                      }}
+                    >
+                      Outcome: {project.outcome}
+                    </div>
+                  ) : null}
+                  <a
+                    href={project.link || "/work"}
+                    target={project.link ? "_blank" : undefined}
+                    rel={project.link ? "noreferrer" : undefined}
+                    className="mt-5 inline-flex items-center gap-1 text-[12px] font-medium"
+                    style={{ color: accentColor }}
+                  >
+                    View details <ArrowRight className="h-4 w-4" />
+                  </a>
+                </article>
+              )
+            })}
           </div>
         </Container>
       </section>
 
-      <section className="bg-sand">
-        <Container className="grid gap-6 py-14 md:grid-cols-[1.2fr_0.8fr]">
-          <div>
-            <h2 className="text-3xl font-semibold">Ready to talk?</h2>
-            <p className="mt-3 text-slate">
-              We will respond within two business days with clear next steps.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 md:items-end md:justify-center">
-            <Button asChild size="lg">
-              <Link to="/contact">Start a project</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/about">How we work</Link>
-            </Button>
-          </div>
-        </Container>
-      </section>
-
-      <Dialog open={offerOpen} onOpenChange={setOfferOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {activeOffer ? `Buy: ${activeOffer.label}` : "Offer"}
-            </DialogTitle>
-          </DialogHeader>
-          <form className="space-y-3" onSubmit={handleOfferPay}>
-            <Input
-              placeholder="Full name"
-              value={offerForm.name}
-              onChange={(e) =>
-                setOfferForm((prev) => ({ ...prev, name: e.target.value }))
-              }
-            />
-            <Input
-              placeholder="Email"
-              value={offerForm.email}
-              onChange={(e) =>
-                setOfferForm((prev) => ({ ...prev, email: e.target.value }))
-              }
-            />
-            <Input
-              placeholder="Phone"
-              value={offerForm.phone}
-              onChange={(e) =>
-                setOfferForm((prev) => ({ ...prev, phone: e.target.value }))
-              }
-            />
-            <Button type="submit" className="w-full">
-              Pay INR {activeOffer?.price || ""}
-            </Button>
-            {offerStatus.type !== "idle" && (
-              <p
-                className={`text-sm ${
-                  offerStatus.type === "error" ? "text-red-600" : "text-moss"
-                }`}
-              >
-                {offerStatus.message}
+      {homeContent.showTestimonials !== false ? (
+        <section className="bg-white py-16">
+          <Container>
+            <div className="home-reveal mb-8" data-reveal>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9ca3af]">
+                Testimonials
+              </div>
+              <h2 className="mt-3 text-[30px] font-bold tracking-[-0.04em] text-[#0f172a] sm:text-[34px]">
+                What clients say
+              </h2>
+              <p className="mt-2 text-[14px] text-[#64748b]">
+                Real feedback from teams we have helped ship with more clarity.
               </p>
-            )}
-          </form>
-        </DialogContent>
-      </Dialog>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {testimonials.map((testimonial, index) => (
+                <article
+                  key={`${testimonial.name || "testimonial"}-${index}`}
+                  className="home-reveal rounded-[18px] border border-[#dbeafe] bg-white p-6 shadow-[0_12px_34px_rgba(15,23,42,0.04)]"
+                  data-reveal
+                >
+                  <div className="text-[28px] leading-none" style={{ color: accentColor }}>
+                    "
+                  </div>
+                  <p className="mt-3 text-[14px] leading-7 text-[#475569]">
+                    {testimonial.quote}
+                  </p>
+                  <div className="mt-5 border-t border-fog pt-4">
+                    <div className="text-[14px] font-semibold text-[#0f172a]">
+                      {testimonial.name}
+                    </div>
+                    <div className="mt-1 text-[12px] text-[#64748b]">
+                      {testimonial.role}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
     </div>
   )
 }

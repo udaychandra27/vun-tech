@@ -45,7 +45,6 @@ export function BlogDetail() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     apiFetch(`/api/blog/${slug}`)
       .then((data) => setPost(data))
@@ -78,7 +77,7 @@ export function BlogDetail() {
   }
 
   return (
-    <div className="bg-sand">
+    <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_55%,#ffffff_100%)]">
       <Seo
         title={`${post.meta?.title || post.title} | VUN Tech`}
         description={post.meta?.description || post.excerpt}
@@ -87,7 +86,7 @@ export function BlogDetail() {
         structuredData={post.structuredData}
       />
 
-      <section className="border-b border-fog bg-white">
+      <section className="border-b border-fog bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)]">
         <Container className="grid gap-10 py-14 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
@@ -98,10 +97,10 @@ export function BlogDetail() {
                 </Badge>
               ))}
             </div>
-            <h1 className="max-w-4xl text-4xl font-semibold leading-tight md:text-5xl">
+            <h1 className="max-w-4xl text-[40px] font-semibold leading-tight tracking-[-0.04em] md:text-[58px]">
               {post.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-slate">
+            <div className="flex flex-wrap items-center gap-4 text-[14px] text-slate">
               <span>{post.author}</span>
               <span className="inline-flex items-center gap-1">
                 <CalendarDays className="h-4 w-4" />
@@ -112,10 +111,10 @@ export function BlogDetail() {
                 {post.readTime} min read
               </span>
             </div>
-            <p className="max-w-3xl text-lg text-slate">{post.excerpt}</p>
+            <p className="max-w-3xl text-[18px] leading-8 text-slate">{post.excerpt}</p>
           </div>
 
-          <aside className="space-y-5 rounded-[2rem] border border-fog bg-sand p-5">
+          <aside className="space-y-5 rounded-[2rem] border border-[#dbeafe] bg-[#f8fbff] p-5">
             <div>
               <div className="text-sm font-semibold uppercase tracking-[0.18em] text-ink/60">
                 In this article
@@ -167,7 +166,7 @@ export function BlogDetail() {
       </section>
 
       {post.featuredImage ? (
-        <section className="border-b border-fog bg-sand">
+        <section className="border-b border-fog bg-[#f8fbff]">
           <Container className="py-8">
             <div className="overflow-hidden rounded-[2rem] border border-fog bg-white">
               <OptimizedImage
@@ -183,7 +182,7 @@ export function BlogDetail() {
         </section>
       ) : null}
 
-      <section className="bg-sand">
+      <section className="bg-[#f8fbff]">
         <Container className="py-10">
           <BlogContent html={decorated.html || ""} />
         </Container>

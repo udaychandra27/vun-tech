@@ -111,31 +111,33 @@ export function Trending() {
   }
 
   return (
-    <div className="bg-sand">
-      <section className="relative border-b border-fog bg-sand bg-grid">
+    <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_55%,#ffffff_100%)]">
+      <section className="relative border-b border-fog bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] bg-grid">
         <GradientOrbs />
-        <Container className="py-12">
+        <Container className="py-16">
           <SectionBadge>Trending</SectionBadge>
-          <h1 className="text-4xl font-semibold">Trending digital products</h1>
-          <p className="mt-3 max-w-2xl text-slate">
+          <h1 className="mt-5 text-[40px] font-semibold tracking-[-0.04em] text-ink md:text-[56px]">
+            Trending digital products
+          </h1>
+          <p className="mt-5 max-w-3xl text-[17px] leading-8 text-slate">
             Quick-turn digital products that help students and professionals move faster.
           </p>
         </Container>
       </section>
 
       <section>
-        <Container className="py-12">
+        <Container className="py-14">
           <div className="grid gap-6 md:grid-cols-3">
             {products.map((product) => (
               <Card
                 key={product._id || product.id}
-                className="glass-card cursor-pointer transition-transform hover:-translate-y-1"
+                className="glass-card cursor-pointer rounded-[18px] border-[#dbeafe] bg-white transition-transform hover:-translate-y-1"
                 onClick={() => openDetails(product)}
               >
                 <CardHeader>
-                  <CardTitle>{product.title}</CardTitle>
+                  <CardTitle className="text-[24px]">{product.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-slate">
+                <CardContent className="space-y-3 text-[14px] leading-7 text-slate">
                   <div className="overflow-hidden rounded-xl border border-fog bg-white">
                     {product.imageUrl ? (
                       <OptimizedImage
@@ -151,13 +153,13 @@ export function Trending() {
                   </div>
                   <p>{product.description}</p>
                   {product.details?.length > 0 && (
-                    <ul className="space-y-1 text-xs text-slate">
+                    <ul className="space-y-1 text-[12px] text-slate">
                       {product.details.map((detail) => (
-                        <li key={detail}>• {detail}</li>
+                        <li key={detail}>- {detail}</li>
                       ))}
                     </ul>
                   )}
-                  <div className="text-lg font-semibold text-ink">
+                  <div className="text-[22px] font-semibold text-ink">
                     INR {product.price}
                   </div>
                   <Button onClick={(event) => {
@@ -174,12 +176,12 @@ export function Trending() {
       </section>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg rounded-[24px] border-[#dbeafe]">
           <DialogHeader>
-            <DialogTitle>{active?.title || "Product details"}</DialogTitle>
+            <DialogTitle className="text-[28px]">{active?.title || "Product details"}</DialogTitle>
           </DialogHeader>
           {active && (
-            <div className="space-y-4 text-sm text-slate">
+            <div className="space-y-4 text-[14px] leading-7 text-slate">
               <div className="overflow-hidden rounded-xl border border-fog bg-white">
                 {active.imageUrl ? (
                   <OptimizedImage
@@ -195,13 +197,13 @@ export function Trending() {
               </div>
               <p>{active.description}</p>
               {active.details?.length > 0 && (
-                <ul className="space-y-1 text-xs text-slate">
+                <ul className="space-y-1 text-[12px] text-slate">
                   {active.details.map((detail) => (
-                    <li key={detail}>• {detail}</li>
+                    <li key={detail}>- {detail}</li>
                   ))}
                 </ul>
               )}
-              <div className="text-lg font-semibold text-ink">
+              <div className="text-[22px] font-semibold text-ink">
                 INR {active.price}
               </div>
               <Button onClick={() => {
@@ -216,9 +218,9 @@ export function Trending() {
       </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-[24px] border-[#dbeafe]">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-[28px]">
               {active ? `Buy: ${active.title}` : "Checkout"}
             </DialogTitle>
           </DialogHeader>
