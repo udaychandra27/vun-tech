@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Container } from "@/components/layout/Container"
 import { featuredServices, defaultProjects, values } from "@/data/content"
 import { apiFetch } from "@/lib/api"
+import { PageSkeleton } from "@/components/PageSkeleton"
 import {
   ArrowRight,
   BadgeCheck,
@@ -283,36 +284,37 @@ function BrowserMockup({ caption }) {
 
 export function Home() {
   const pageRef = useRef(null)
-  const [services, setServices] = useState(featuredServices)
-  const [projects, setProjects] = useState(defaultProjects)
-  const [homeContent, setHomeContent] = useState({
-    ...defaultHomeContent,
-    heroCards: [],
-    showTestimonials: true,
-    testimonials: [],
-  })
+  const [services, setServices] = useState([])
+  const [projects, setProjects] = useState([])
+  const [homeContent, setHomeContent] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    apiFetch("/api/services")
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const featured = data.filter((item) => item.featured)
-          setServices(featured.length > 0 ? featured : data)
-        }
-      })
-      .catch(() => {})
+    let mounted = true
 
-    apiFetch("/api/projects")
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setProjects(data)
-        }
-      })
-      .catch(() => {})
+    Promise.allSettled([
+      apiFetch("/api/services"),
+      apiFetch("/api/projects"),
+      apiFetch("/api/content/home"),
+    ])
+      .then(([servicesResult, projectsResult, contentResult]) => {
+        if (!mounted) return
 
-    apiFetch("/api/content/home")
-      .then((data) => {
-        if (data) {
+        if (servicesResult.status === "fulfilled" && Array.isArray(servicesResult.value) && servicesResult.value.length > 0) {
+          const featured = servicesResult.value.filter((item) => item.featured)
+          setServices(featured.length > 0 ? featured : servicesResult.value)
+        } else {
+          setServices(featuredServices)
+        }
+
+        if (projectsResult.status === "fulfilled" && Array.isArray(projectsResult.value) && projectsResult.value.length > 0) {
+          setProjects(projectsResult.value)
+        } else {
+          setProjects(defaultProjects)
+        }
+
+        if (contentResult.status === "fulfilled" && contentResult.value) {
+          const data = contentResult.value
           setHomeContent({
             hero_title: data.hero_title || defaultHomeContent.hero_title,
             hero_subtitle: data.hero_subtitle || defaultHomeContent.hero_subtitle,
@@ -343,9 +345,24 @@ export function Home() {
             showTestimonials: data.showTestimonials ?? true,
             testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
           })
+        } else {
+          setHomeContent({
+            ...defaultHomeContent,
+            heroCards: [],
+            showTestimonials: true,
+            testimonials: [],
+          })
         }
       })
-      .catch(() => {})
+      .finally(() => {
+        if (mounted) {
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   useEffect(() => {
@@ -409,6 +426,18 @@ export function Home() {
     () => ({ boxShadow: `0 18px 45px ${accentColor}24` }),
     [accentColor]
   )
+
+  if (loading || !homeContent) {
+    return (
+      <PageSkeleton
+        badge="Home"
+        titleWidth="max-w-[520px]"
+        chipCount={4}
+        cardCount={6}
+        cardClassName="min-h-[280px]"
+      />
+    )
+  }
 
   return (
     <div

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { SectionBadge, GradientOrbs } from "@/components/Decorations"
 import { featuredServices } from "@/data/content"
 import { apiFetch } from "@/lib/api"
+import { PageSkeleton } from "@/components/PageSkeleton"
 
 const initialForm = {
   name: "",
@@ -107,29 +108,37 @@ export function Contact() {
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState({ type: "idle", message: "" })
   const [content, setContent] = useState(initialContent)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let mounted = true
 
-    apiFetch("/api/content/contact")
-      .then((data) => {
-        if (!mounted || !data) return
-        setContent((prev) => ({
-          ...prev,
-          ...data,
-          trustPoints: data.trustPoints?.length ? data.trustPoints : prev.trustPoints,
-          nextSteps: data.nextSteps?.length ? data.nextSteps : prev.nextSteps,
-          requirements: data.requirements?.length ? data.requirements : prev.requirements,
-        }))
-      })
-      .catch(() => {})
+    Promise.allSettled([apiFetch("/api/content/contact"), apiFetch("/api/services")])
+      .then(([contentResult, servicesResult]) => {
+        if (!mounted) return
 
-    apiFetch("/api/services")
-      .then((data) => {
-        if (!mounted || !Array.isArray(data)) return
-        setServices(data.filter((item) => item.visible !== false))
+        if (contentResult.status === "fulfilled" && contentResult.value) {
+          const data = contentResult.value
+          setContent((prev) => ({
+            ...prev,
+            ...data,
+            trustPoints: data.trustPoints?.length ? data.trustPoints : prev.trustPoints,
+            nextSteps: data.nextSteps?.length ? data.nextSteps : prev.nextSteps,
+            requirements: data.requirements?.length ? data.requirements : prev.requirements,
+          }))
+        }
+
+        if (servicesResult.status === "fulfilled" && Array.isArray(servicesResult.value)) {
+          setServices(servicesResult.value.filter((item) => item.visible !== false))
+        } else {
+          setServices(featuredServices)
+        }
       })
-      .catch(() => {})
+      .finally(() => {
+        if (mounted) {
+          setLoading(false)
+        }
+      })
 
     return () => {
       mounted = false
@@ -138,11 +147,22 @@ export function Contact() {
 
   const serviceOptions = useMemo(
     () =>
-      (services.length > 0 ? services : featuredServices)
-        .map((service) => service.title)
-        .filter(Boolean),
+      services.length > 0 ? services.map((service) => service.title).filter(Boolean) : [],
     [services]
   )
+
+  if (loading) {
+    return (
+      <PageSkeleton
+        badge="Contact"
+        titleWidth="max-w-[540px]"
+        showSidebar
+        cardCount={1}
+        columnsClassName="grid-cols-1"
+        cardClassName="min-h-[760px]"
+      />
+    )
+  }
 
   const handleChange = (event) => {
     const { name, value } = event.target

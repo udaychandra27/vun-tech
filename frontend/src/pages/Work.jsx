@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionBadge, GradientOrbs } from "@/components/Decorations"
 import { apiFetch } from "@/lib/api"
 import { defaultProjects } from "@/data/content"
+import { PageSkeleton } from "@/components/PageSkeleton"
 
 const iconMap = {
   Monitor,
@@ -98,25 +99,39 @@ function normalizeProject(project) {
 }
 
 export function Work() {
-  const [projects, setProjects] = useState(defaultProjects)
-  const [content, setContent] = useState(fallbackContent)
+  const [projects, setProjects] = useState([])
+  const [content, setContent] = useState(null)
   const [activeFilter, setActiveFilter] = useState("all")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    apiFetch("/api/projects")
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setProjects(data)
+    let mounted = true
+
+    Promise.allSettled([apiFetch("/api/projects"), apiFetch("/api/content/work")])
+      .then(([projectsResult, contentResult]) => {
+        if (!mounted) return
+
+        if (projectsResult.status === "fulfilled" && Array.isArray(projectsResult.value) && projectsResult.value.length > 0) {
+          setProjects(projectsResult.value)
+        } else {
+          setProjects(defaultProjects)
+        }
+
+        if (contentResult.status === "fulfilled" && contentResult.value) {
+          setContent({ ...fallbackContent, ...contentResult.value })
+        } else {
+          setContent(fallbackContent)
         }
       })
-      .catch(() => {})
-
-    apiFetch("/api/content/work")
-      .then((data) => {
-        if (!data) return
-        setContent((prev) => ({ ...prev, ...data }))
+      .finally(() => {
+        if (mounted) {
+          setLoading(false)
+        }
       })
-      .catch(() => {})
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const normalizedProjects = useMemo(
@@ -133,6 +148,18 @@ export function Work() {
     if (activeFilter === "all") return normalizedProjects
     return normalizedProjects.filter((project) => project.domain === activeFilter)
   }, [activeFilter, normalizedProjects])
+
+  if (loading || !content) {
+    return (
+      <PageSkeleton
+        badge="Work"
+        titleWidth="max-w-[520px]"
+        filterCount={4}
+        cardCount={3}
+        showFooterCta
+      />
+    )
+  }
 
   return (
     <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_34%,#f4f8ff_100%)]">

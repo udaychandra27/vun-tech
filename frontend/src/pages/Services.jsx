@@ -24,6 +24,7 @@ import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog"
 import { featuredServices } from "@/data/content"
 import { apiFetch } from "@/lib/api"
 import { GradientOrbs, SectionBadge } from "@/components/Decorations"
+import { PageSkeleton } from "@/components/PageSkeleton"
 
 const iconMap = {
   Monitor,
@@ -292,7 +293,8 @@ function normalizeService(service) {
 }
 
 export function Services() {
-  const [services, setServices] = useState(featuredServices)
+  const [services, setServices] = useState([])
+  const [loading, setLoading] = useState(true)
   const normalizedServices = useMemo(
     () => services.map((service) => normalizeService(service)),
     [services]
@@ -304,10 +306,30 @@ export function Services() {
   useEffect(() => {
     apiFetch("/api/services")
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setServices(data)
+        if (Array.isArray(data) && data.length > 0) {
+          setServices(data)
+        } else {
+          setServices(featuredServices)
+        }
       })
-      .catch(() => {})
+      .catch(() => {
+        setServices(featuredServices)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
+
+  if (loading) {
+    return (
+      <PageSkeleton
+        badge="Services"
+        titleWidth="max-w-[360px]"
+        cardCount={4}
+        cardClassName="min-h-[500px]"
+      />
+    )
+  }
 
   const openService = (service) => {
     setActiveService(service)

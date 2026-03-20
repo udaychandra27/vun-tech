@@ -5,6 +5,7 @@ import { SectionBadge, GradientOrbs } from "@/components/Decorations"
 import { apiFetch, API_URL } from "@/lib/api"
 import { Linkedin } from "lucide-react"
 import { OptimizedImage } from "@/components/OptimizedImage"
+import { PageSkeleton } from "@/components/PageSkeleton"
 
 const defaultApproach = [
   {
@@ -47,7 +48,9 @@ export function About() {
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("aboutTeamMembers") || "null")
       : null
-  const [content, setContent] = useState({
+  const [content, setContent] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const fallbackContent = {
     heroTitle: "Small team, serious delivery",
     heroSubtitle:
       "We are a focused group of engineers and product strategists. Our work is grounded in honesty, simple execution, and measurable progress.",
@@ -64,7 +67,7 @@ export function About() {
     ],
     closingNote:
       "We work best with teams who value clear communication, respect time, and want solutions that last. If that sounds like you, we should talk.",
-  })
+  }
 
   const resolveImageUrl = (url) => {
     if (!url) return ""
@@ -81,28 +84,57 @@ export function About() {
     let mounted = true
     apiFetch("/api/content/about")
       .then((data) => {
-        if (!mounted || !data) return
+        if (!mounted) return
+        if (!data) {
+          setContent(fallbackContent)
+          return
+        }
         setContent((prev) => ({
-          ...prev,
+          ...(prev || fallbackContent),
           ...data,
-          approach: data.approach?.length ? data.approach : prev.approach,
-          team: data.team?.length ? data.team : prev.team,
-          highlightTitle: data.highlightTitle || prev.highlightTitle,
-          highlightSubtitle: data.highlightSubtitle || prev.highlightSubtitle,
+          approach: data.approach?.length ? data.approach : (prev || fallbackContent).approach,
+          team: data.team?.length ? data.team : (prev || fallbackContent).team,
+          highlightTitle: data.highlightTitle || (prev || fallbackContent).highlightTitle,
+          highlightSubtitle:
+            data.highlightSubtitle || (prev || fallbackContent).highlightSubtitle,
           highlightPoints: data.highlightPoints?.length
             ? data.highlightPoints
-            : prev.highlightPoints,
-          closingNote: data.closingNote || prev.closingNote,
+            : (prev || fallbackContent).highlightPoints,
+          closingNote: data.closingNote || (prev || fallbackContent).closingNote,
         }))
         if (Array.isArray(data.team) && data.team.length > 0) {
           localStorage.setItem("aboutTeamMembers", JSON.stringify(data.team))
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        if (mounted) {
+          setContent({
+            ...fallbackContent,
+            team: Array.isArray(storedTeam) && storedTeam.length > 0 ? storedTeam : defaultTeam,
+          })
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setLoading(false)
+        }
+      })
     return () => {
       mounted = false
     }
   }, [])
+
+  if (loading || !content) {
+    return (
+      <PageSkeleton
+        badge="About"
+        titleWidth="max-w-[420px]"
+        cardCount={6}
+        columnsClassName="md:grid-cols-3"
+        cardClassName="min-h-[240px]"
+      />
+    )
+  }
 
   return (
     <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_55%,#ffffff_100%)]">
