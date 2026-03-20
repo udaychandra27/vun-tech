@@ -388,14 +388,20 @@ export function Home() {
 
   useEffect(() => {
     const root = document.documentElement
-    const accent = homeContent.brand_accent_color || DEFAULT_ACCENT_COLOR
+    const accent = homeContent?.brand_accent_color || DEFAULT_ACCENT_COLOR
     root.style.setProperty("--accent-color", accent)
 
     return () => {
       root.style.setProperty("--accent-color", DEFAULT_ACCENT_COLOR)
     }
-  }, [homeContent.brand_accent_color])
+  }, [homeContent?.brand_accent_color])
 
+  const resolvedHomeContent = homeContent || {
+    ...defaultHomeContent,
+    heroCards: [],
+    showTestimonials: true,
+    testimonials: [],
+  }
   const heroServices = mergeWithFallback(services, featuredServices, 3, (item) => item.title)
   const serviceCards = mergeWithFallback(services, featuredServices, 4, (item) => item.title)
   const selectedProjects = mergeWithFallback(
@@ -404,24 +410,24 @@ export function Home() {
     2,
     (item) => item.name
   )
-  const testimonials = (homeContent.testimonials || []).filter(
+  const testimonials = (resolvedHomeContent.testimonials || []).filter(
     (item) => item?.quote || item?.name || item?.role
   ).length
-    ? homeContent.testimonials.filter((item) => item?.quote || item?.name || item?.role)
+    ? resolvedHomeContent.testimonials.filter((item) => item?.quote || item?.name || item?.role)
     : fallbackTestimonials
-  const trustedBadges = (homeContent.trusted_badges || []).filter(Boolean).length
-    ? homeContent.trusted_badges.filter(Boolean)
+  const trustedBadges = (resolvedHomeContent.trusted_badges || []).filter(Boolean).length
+    ? resolvedHomeContent.trusted_badges.filter(Boolean)
     : defaultHomeContent.trusted_badges
-  const whyChooseItems = (homeContent.why_choose_items || []).filter(
+  const whyChooseItems = (resolvedHomeContent.why_choose_items || []).filter(
     (item) => item?.title || item?.description
   ).length
-    ? homeContent.why_choose_items.filter((item) => item?.title || item?.description)
+    ? resolvedHomeContent.why_choose_items.filter((item) => item?.title || item?.description)
     : defaultHomeContent.why_choose_items
-  const stats = (homeContent.stats || []).filter((item) => item?.value || item?.label).length
-    ? homeContent.stats.filter((item) => item?.value || item?.label)
+  const stats = (resolvedHomeContent.stats || []).filter((item) => item?.value || item?.label).length
+    ? resolvedHomeContent.stats.filter((item) => item?.value || item?.label)
     : defaultHomeContent.stats
-  const accentColor = homeContent.brand_accent_color || DEFAULT_ACCENT_COLOR
-  const headline = splitHeadline(homeContent.hero_title)
+  const accentColor = resolvedHomeContent.brand_accent_color || DEFAULT_ACCENT_COLOR
+  const headline = splitHeadline(resolvedHomeContent.hero_title)
   const accentCardShadow = useMemo(
     () => ({ boxShadow: `0 18px 45px ${accentColor}24` }),
     [accentColor]
