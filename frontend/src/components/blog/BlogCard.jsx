@@ -19,7 +19,7 @@ export function BlogCard({ post }) {
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#2563eb] text-sm text-white/70">
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#2563eb] text-sm text-white/85">
             No featured image
           </div>
         )}
@@ -61,7 +61,7 @@ export function BlogCard({ post }) {
         </div>
 
         <Button asChild>
-          <Link to={`/blog/${post.slug}`}>Read More</Link>
+          <Link to={`/blog/${post.slug}`}>Read article: {post.title}</Link>
         </Button>
       </CardContent>
     </Card>

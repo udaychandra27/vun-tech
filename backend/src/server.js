@@ -3,7 +3,9 @@ import helmet from "helmet"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import dotenv from "dotenv"
+import fs from "fs/promises"
 import path from "path"
+import sharp from "sharp"
 import publicRoutes from "./routes/public.js"
 import adminRoutes from "./routes/admin.js"
 import { connectDatabase } from "./config/db.js"
@@ -27,6 +29,8 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
+const uploadsRoot = path.join(process.cwd(), "uploads")
+const optimizedUploadsRoot = path.join(uploadsRoot, ".optimized")
 
 app.set("trust proxy", 1)
 
@@ -70,13 +74,84 @@ app.use("/api/admin/login", loginLimiter)
 
 app.use("/api", publicRoutes)
 app.use("/api", adminRoutes)
+
+function setUploadHeaders(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable")
+  res.setHeader("Vary", "Accept")
+}
+
+function getPreferredImageFormat(acceptHeader = "") {
+  if (acceptHeader.includes("image/avif")) {
+    return "avif"
+  }
+  if (acceptHeader.includes("image/webp")) {
+    return "webp"
+  }
+  return null
+}
+
+async function serveOptimizedUpload(req, res, next) {
+  if (!["GET", "HEAD"].includes(req.method)) {
+    return next()
+  }
+
+  const relativePath = req.path.replace(/^\/+/, "")
+  if (!/\.(png|jpe?g|webp)$/i.test(relativePath)) {
+    return next()
+  }
+
+  const preferredFormat = getPreferredImageFormat(req.headers.accept || "")
+  if (!preferredFormat) {
+    return next()
+  }
+
+  const sourcePath = path.join(uploadsRoot, relativePath)
+  const cachedRelativePath = relativePath.replace(/\.[^.]+$/, `.${preferredFormat}`)
+  const cachedPath = path.join(optimizedUploadsRoot, cachedRelativePath)
+
+  try {
+    const sourceStats = await fs.stat(sourcePath)
+    let needsRefresh = false
+
+    try {
+      const cachedStats = await fs.stat(cachedPath)
+      needsRefresh = cachedStats.mtimeMs < sourceStats.mtimeMs
+    } catch {
+      needsRefresh = true
+    }
+
+    if (needsRefresh) {
+      await fs.mkdir(path.dirname(cachedPath), { recursive: true })
+      const transformer = sharp(sourcePath).rotate().resize({
+        width: 1600,
+        withoutEnlargement: true,
+      })
+
+      if (preferredFormat === "avif") {
+        await transformer.avif({ quality: 52 }).toFile(cachedPath)
+      } else {
+        await transformer.webp({ quality: 72 }).toFile(cachedPath)
+      }
+    }
+
+    setUploadHeaders(res)
+    res.type(preferredFormat === "avif" ? "image/avif" : "image/webp")
+    return res.sendFile(cachedPath)
+  } catch {
+    return next()
+  }
+}
+
+app.use("/uploads", serveOptimizedUpload)
 app.use(
   "/uploads",
-  express.static(path.join(process.cwd(), "uploads"), {
-    maxAge: "7d",
+  express.static(uploadsRoot, {
+    maxAge: "1y",
+    immutable: true,
     setHeaders: (res) => {
-      res.setHeader("Access-Control-Allow-Origin", "*")
-      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
+      setUploadHeaders(res)
     },
   })
 )

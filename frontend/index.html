@@ -1,22 +1,56 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="preload" as="image" href="/vun-logo.webp" type="image/webp" fetchpriority="high" />
     <meta charset="UTF-8" />
     <meta name="description" content="VUN Tech builds and maintains reliable software with clear scope and honest delivery." />
     <link rel="icon" href="/favicon.ico" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#0f172a" />
+    <style>
+      :root {
+        color: #0f172a;
+        background: #ffffff;
+      }
+
+      html,
+      body,
+      #root {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: #ffffff;
+        color: #0f172a;
+        font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+        text-rendering: optimizeSpeed;
+      }
+    </style>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' https://checkout.razorpay.com 'unsafe-inline';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob: https:;
+        connect-src %VITE_CSP_CONNECT_SRC%;
+        font-src 'self' data:;
+        frame-src https://checkout.razorpay.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'self';
+      "
+    />
     <meta property="og:title" content="VUN Tech" />
     <meta property="og:description" content="Reliable software delivery with clear scope, honest timelines, and modern UX." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/vun-logo.png" />
+    <meta property="og:image" content="/vun-logo.webp" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="VUN Tech" />
     <meta name="twitter:description" content="Reliable software delivery with clear scope, honest timelines, and modern UX." />
-    <meta name="twitter:image" content="/vun-logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+    <meta name="twitter:image" content="/vun-logo.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VUN Tech</title>
   </head>

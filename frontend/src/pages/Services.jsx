@@ -427,7 +427,7 @@ export function Services() {
                           </span>
                         </div>
                         <span className="inline-flex shrink-0 items-center gap-2 text-[12px] font-medium text-moss">
-                          View more <ArrowRight className="h-4 w-4" />
+                          Open service details <ArrowRight className="h-4 w-4" />
                         </span>
                       </div>
                     </div>

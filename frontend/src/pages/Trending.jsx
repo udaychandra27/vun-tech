@@ -8,6 +8,31 @@ import { Input } from "@/components/ui/input"
 import { apiFetch } from "@/lib/api"
 import { OptimizedImage } from "@/components/OptimizedImage"
 
+let razorpayScriptPromise
+
+function loadRazorpayCheckout() {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Payment checkout is only available in the browser."))
+  }
+
+  if (window.Razorpay) {
+    return Promise.resolve(window.Razorpay)
+  }
+
+  if (!razorpayScriptPromise) {
+    razorpayScriptPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js"
+      script.async = true
+      script.onload = () => resolve(window.Razorpay)
+      script.onerror = () => reject(new Error("Unable to load the payment system."))
+      document.head.appendChild(script)
+    })
+  }
+
+  return razorpayScriptPromise
+}
+
 export function Trending() {
   const [open, setOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -47,12 +72,8 @@ export function Trending() {
       setStatus({ type: "error", message: "Enter a valid email." })
       return
     }
-    if (!window.Razorpay) {
-      setStatus({ type: "error", message: "Payment system not loaded." })
-      return
-    }
-
     try {
+      await loadRazorpayCheckout()
       setStatus({ type: "loading", message: "Creating payment..." })
       const order = await apiFetch("/api/payments/order", {
         method: "POST",
@@ -166,7 +187,7 @@ export function Trending() {
                     event.stopPropagation()
                     openDetails(product)
                   }}>
-                    View details
+                    View product details
                   </Button>
                 </CardContent>
               </Card>
@@ -210,7 +231,7 @@ export function Trending() {
                 setDetailsOpen(false)
                 openCheckout()
               }}>
-                Proceed to checkout
+                Proceed to secure checkout
               </Button>
             </div>
           )}

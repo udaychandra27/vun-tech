@@ -1,10 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import { Suspense, lazy } from "react"
+import { Suspense, lazy, useEffect, useState } from "react"
 import { SiteHeader } from "@/components/layout/SiteHeader"
 import { SiteFooter } from "@/components/layout/SiteFooter"
 import { RequireAuth } from "@/routes/RequireAuth"
 import { Home } from "@/pages/Home"
-import { ChatWidget } from "@/components/ChatWidget"
 const Services = lazy(() =>
   import("@/pages/Services").then((m) => ({ default: m.Services }))
 )
@@ -40,6 +39,45 @@ const AdminBlogManager = lazy(() =>
 const AdminBlogEditor = lazy(() =>
   import("@/pages/AdminBlogEditor").then((m) => ({ default: m.AdminBlogEditor }))
 )
+const ChatWidget = lazy(() =>
+  import("@/components/ChatWidget").then((m) => ({ default: m.ChatWidget }))
+)
+
+function DeferredChatWidget() {
+  const [enabled, setEnabled] = useState(false)
+
+  useEffect(() => {
+    let timeoutId
+    let idleId
+
+    const enable = () => setEnabled(true)
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(enable, { timeout: 2500 })
+    } else {
+      timeoutId = window.setTimeout(enable, 1800)
+    }
+
+    return () => {
+      if (typeof window !== "undefined" && idleId && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [])
+
+  if (!enabled) {
+    return null
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <ChatWidget />
+    </Suspense>
+  )
+}
 
 function App() {
   return (
@@ -47,7 +85,7 @@ function App() {
       <div className="flex min-h-screen flex-col bg-white">
         <SiteHeader />
         <main className="flex-1">
-          <Suspense fallback={<div className="px-6 py-10 text-sm text-slate">Loading...</div>}>
+          <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/services" element={<Services />} />
@@ -96,7 +134,7 @@ function App() {
           </Suspense>
         </main>
         <SiteFooter />
-        <ChatWidget />
+        <DeferredChatWidget />
       </div>
     </BrowserRouter>
   )

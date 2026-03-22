@@ -350,7 +350,7 @@ export function Contact() {
                   </div>
                   <div>
                     <label className="mb-2 block text-[14px] font-medium text-slate">
-                      Company <span className="text-ink/50">(optional)</span>
+                      Company <span className="text-[#475569]">(optional)</span>
                     </label>
                     <Input
                       name="company"
@@ -411,7 +411,7 @@ export function Contact() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-[14px] font-medium text-slate">
-                      {content.linkFieldLabel} <span className="text-ink/50">(optional)</span>
+                      {content.linkFieldLabel} <span className="text-[#475569]">(optional)</span>
                     </label>
                     <Input
                       name="referenceLink"
@@ -426,7 +426,7 @@ export function Contact() {
                   </div>
                   <div>
                     <label className="mb-2 block text-[14px] font-medium text-slate">
-                      Upload file <span className="text-ink/50">(optional)</span>
+                      Upload file <span className="text-[#475569]">(optional)</span>
                     </label>
                     <div className="flex h-14 items-center rounded-[16px] border border-dashed border-[#cbd5e1] bg-[#f8fbff] px-4">
                       <input

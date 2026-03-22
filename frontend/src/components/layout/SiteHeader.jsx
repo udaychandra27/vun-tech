@@ -31,10 +31,13 @@ export function SiteHeader() {
           </button>
           <Link to="/" className="flex min-w-0 items-center gap-3 sm:gap-4">
             <OptimizedImage
-              src="/vun-logo.png"
+              src="/vun-logo.webp"
               alt="VUN Tech logo"
-              width={160}
-              height={160}
+              width={96}
+              height={96}
+              loading="eager"
+              fetchPriority="low"
+              sizes="(min-width: 768px) 80px, (min-width: 640px) 72px, 64px"
               className="-my-2 h-16 w-16 shrink-0 rounded-md object-contain sm:h-[4.5rem] sm:w-[4.5rem] md:h-20 md:w-20"
             />
             <div className="leading-tight">

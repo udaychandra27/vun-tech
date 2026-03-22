@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         ink: "#0e151b",
-        slate: "#4b5563",
+        slate: "#334155",
         sand: "#f8fafc",
         moss: "#2563eb",
         fog: "#e5e7eb",
@@ -15,8 +15,8 @@ export default {
         navy: "#0f172a",
       },
       fontFamily: {
-        display: ["\"Fraunces\"", "serif"],
-        body: ["\"Inter\"", "system-ui", "sans-serif"],
+        display: ["Georgia", "\"Times New Roman\"", "Times", "serif"],
+        body: ["\"Segoe UI\"", "system-ui", "-apple-system", "BlinkMacSystemFont", "\"Helvetica Neue\"", "Arial", "sans-serif"],
       },
     },
   },

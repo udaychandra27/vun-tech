@@ -1,4 +1,6 @@
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"
+const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim()
+
+export const API_URL = configuredApiUrl || (import.meta.env.DEV ? "http://localhost:5000" : "")
 
 export function getAuthToken() {
   return localStorage.getItem("tsa_token")

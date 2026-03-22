@@ -116,7 +116,7 @@ export function BlogDetail() {
 
           <aside className="space-y-5 rounded-[2rem] border border-[#dbeafe] bg-[#f8fbff] p-5">
             <div>
-              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-ink/60">
+              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-[#475569]">
                 In this article
               </div>
               <div className="mt-4 space-y-3">
@@ -135,7 +135,7 @@ export function BlogDetail() {
             </div>
 
             <div className="border-t border-fog pt-5">
-              <div className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-ink/60">
+              <div className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#475569]">
                 Share
               </div>
               <div className="flex flex-wrap gap-2">

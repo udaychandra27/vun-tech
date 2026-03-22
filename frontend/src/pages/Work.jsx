@@ -226,7 +226,7 @@ export function Work() {
                   <div className={`h-1 w-full ${accent.strip}`} />
                   <CardHeader className="pb-1 pt-4">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#94a3b8]">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#64748b]">
                         {project.domain}
                       </div>
                       <div
@@ -249,7 +249,7 @@ export function Work() {
 
                     {project.includes.length > 0 ? (
                       <div className="border-t border-[#e2e8f0] pt-3">
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#94a3b8]">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#64748b]">
                           Includes
                         </div>
                         <div className="mt-2 space-y-1.5">
@@ -265,7 +265,7 @@ export function Work() {
 
                     {project.stack.length > 0 ? (
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#94a3b8]">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#64748b]">
                           Stack
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -291,7 +291,7 @@ export function Work() {
                     ) : null}
 
                     <div className="rounded-[14px] bg-[#f8fbff] px-3.5 py-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#64748b]">
                         Ideal for
                       </div>
                       <p className="mt-1 text-[13px] leading-5.5 text-slate">
@@ -306,11 +306,11 @@ export function Work() {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        View details <ArrowRight className="h-4 w-4" />
+                        Visit project case study <ArrowRight className="h-4 w-4" />
                       </a>
                     ) : (
-                      <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#2563eb]/60">
-                        View details <ArrowRight className="h-4 w-4" />
+                      <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#1d4ed8]">
+                        Project details unavailable <ArrowRight className="h-4 w-4" />
                       </span>
                     )}
                   </CardContent>
