@@ -22,21 +22,6 @@ const PRODUCTION_CSP = [
   "upgrade-insecure-requests",
 ].join("; ")
 
-const DEVELOPMENT_CSP = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'self'",
-  "form-action 'self'",
-  "script-src 'self' http://localhost:5173 https://checkout.razorpay.com https://static.cloudflareinsights.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://res.cloudinary.com",
-  "font-src 'self' data:",
-  "connect-src 'self' http://localhost:5000 http://localhost:5173 ws://localhost:5173 https://vun-tech-jtvr.onrender.com https://cloudflareinsights.com https://api.razorpay.com https://checkout.razorpay.com",
-  "frame-src 'self' https://checkout.razorpay.com",
-  "manifest-src 'self'",
-].join("; ")
-
 export default defineConfig(({ mode }) => {
   loadEnv(mode, __dirname, "")
 
@@ -54,11 +39,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-      },
-    },
-    server: {
-      headers: {
-        "Content-Security-Policy": DEVELOPMENT_CSP,
       },
     },
     build: {

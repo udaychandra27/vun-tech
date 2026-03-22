@@ -60,7 +60,10 @@ export function BlogCard({ post }) {
           ))}
         </div>
 
-        <Button asChild>
+        <Button
+          asChild
+          className="h-auto w-full justify-start whitespace-normal py-3 text-left leading-6"
+        >
           <Link to={`/blog/${post.slug}`}>Read article: {post.title}</Link>
         </Button>
       </CardContent>

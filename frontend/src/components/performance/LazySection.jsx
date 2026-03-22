@@ -3,8 +3,9 @@ import { Suspense, useEffect, useRef, useState } from "react"
 export function LazySection({
   children,
   fallback = null,
-  rootMargin = "320px 0px",
+  rootMargin = "1200px 0px",
   containIntrinsicSize = "900px",
+  idleTimeout = 1400,
 }) {
   const hostRef = useRef(null)
   const [shouldRender, setShouldRender] = useState(
@@ -19,6 +20,8 @@ export function LazySection({
 
     if (typeof IntersectionObserver === "undefined") return undefined
 
+    let timeoutId
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
@@ -31,8 +34,16 @@ export function LazySection({
 
     observer.observe(node)
 
-    return () => observer.disconnect()
-  }, [rootMargin, shouldRender])
+    timeoutId = window.setTimeout(() => {
+      setShouldRender(true)
+      observer.disconnect()
+    }, idleTimeout)
+
+    return () => {
+      observer.disconnect()
+      window.clearTimeout(timeoutId)
+    }
+  }, [idleTimeout, rootMargin, shouldRender])
 
   return (
     <div

@@ -194,7 +194,7 @@ function mergeWithFallback(primary, fallback, count, key) {
     if (!value || seen.has(value) || next.length >= count) return
     seen.add(value)
     next.push(item)
-  })
+  }, [])
 
   return next
 }
@@ -330,6 +330,7 @@ function HomeSectionFallback({ className = "", height = "320px" }) {
 export function Home() {
   const pageRef = useRef(null)
   const revealObserverRef = useRef(null)
+  const mutationObserverRef = useRef(null)
   const [services, setServices] = useState(featuredServices)
   const [projects, setProjects] = useState(defaultProjects)
   const [homeContent, setHomeContent] = useState({
@@ -445,17 +446,46 @@ export function Home() {
       )
     }
 
-    scope.querySelectorAll("[data-reveal]").forEach((element) => {
-      if (element.dataset.revealObserved === "true") return
-      element.dataset.revealObserved = "true"
-      revealObserverRef.current.observe(element)
+    const observeRevealElements = (root) => {
+      root.querySelectorAll("[data-reveal]").forEach((element) => {
+        if (element.dataset.revealObserved === "true") return
+        element.dataset.revealObserved = "true"
+        revealObserverRef.current.observe(element)
+      })
+    }
+
+    observeRevealElements(scope)
+
+    if (!mutationObserverRef.current) {
+      mutationObserverRef.current = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (!(node instanceof Element)) return
+            if (node.matches("[data-reveal]")) {
+              observeRevealElements(node.parentElement || node)
+              return
+            }
+            observeRevealElements(node)
+          })
+        })
+      })
+    }
+
+    mutationObserverRef.current.observe(scope, {
+      childList: true,
+      subtree: true,
     })
 
-    return undefined
+    return () => {
+      mutationObserverRef.current?.disconnect()
+    }
   })
 
   useEffect(() => {
-    return () => revealObserverRef.current?.disconnect()
+    return () => {
+      mutationObserverRef.current?.disconnect()
+      revealObserverRef.current?.disconnect()
+    }
   }, [])
 
   useEffect(() => {
@@ -742,6 +772,7 @@ export function Home() {
 
       <LazySection
         containIntrinsicSize="180px"
+        idleTimeout={800}
         fallback={<HomeSectionFallback className="border-y border-fog bg-[#f8fbff]" height="160px" />}
       >
         <TrustedBadgesSection trustedBadges={trustedBadges} />
@@ -749,6 +780,7 @@ export function Home() {
 
       <LazySection
         containIntrinsicSize="720px"
+        idleTimeout={900}
         fallback={<HomeSectionFallback className="bg-white" height="720px" />}
       >
         <WhyChooseSection whyChooseItems={whyChooseItems} accentColor={accentColor} />
@@ -756,6 +788,7 @@ export function Home() {
 
       <LazySection
         containIntrinsicSize="220px"
+        idleTimeout={1000}
         fallback={<HomeSectionFallback className="bg-[#f8fbff]" height="220px" />}
       >
         <StatsSection stats={stats} accentColor={accentColor} />
@@ -763,6 +796,8 @@ export function Home() {
 
       <LazySection
         containIntrinsicSize="860px"
+        rootMargin="1600px 0px"
+        idleTimeout={1100}
         fallback={<HomeSectionFallback className="bg-[#f8fbff]" height="860px" />}
       >
         <ServicesSection serviceCards={serviceCards} accentColor={accentColor} />
@@ -770,6 +805,8 @@ export function Home() {
 
       <LazySection
         containIntrinsicSize="760px"
+        rootMargin="1800px 0px"
+        idleTimeout={1200}
         fallback={<HomeSectionFallback className="bg-white" height="760px" />}
       >
         <PortfolioSection selectedProjects={selectedProjects} accentColor={accentColor} />
@@ -778,6 +815,8 @@ export function Home() {
       {resolvedHomeContent.showTestimonials !== false ? (
         <LazySection
           containIntrinsicSize="620px"
+          rootMargin="2000px 0px"
+          idleTimeout={1400}
           fallback={<HomeSectionFallback className="bg-white" height="620px" />}
         >
           <TestimonialsSection testimonials={testimonials} accentColor={accentColor} />
