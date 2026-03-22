@@ -6,22 +6,39 @@ import { fileURLToPath } from "url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const PRODUCTION_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "script-src 'self' https://checkout.razorpay.com https://static.cloudflareinsights.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://res.cloudinary.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://vun-tech-jtvr.onrender.com https://cloudflareinsights.com https://api.razorpay.com https://checkout.razorpay.com",
+  "frame-src 'self' https://checkout.razorpay.com",
+  "manifest-src 'self'",
+  "upgrade-insecure-requests",
+].join("; ")
+
+const DEVELOPMENT_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "script-src 'self' http://localhost:5173 https://checkout.razorpay.com https://static.cloudflareinsights.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://res.cloudinary.com",
+  "font-src 'self' data:",
+  "connect-src 'self' http://localhost:5000 http://localhost:5173 ws://localhost:5173 https://vun-tech-jtvr.onrender.com https://cloudflareinsights.com https://api.razorpay.com https://checkout.razorpay.com",
+  "frame-src 'self' https://checkout.razorpay.com",
+  "manifest-src 'self'",
+].join("; ")
+
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, __dirname, "")
-  const connectSrc = env.VITE_CSP_CONNECT_SRC || "'self' https: wss:"
-  const contentSecurityPolicy = [
-    "default-src 'self'",
-    "script-src 'self' https://checkout.razorpay.com 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https:",
-    `connect-src ${connectSrc}`,
-    "font-src 'self' data:",
-    "frame-src https://checkout.razorpay.com",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'self'",
-  ].join("; ")
+  loadEnv(mode, __dirname, "")
 
   return {
     plugins: [
@@ -41,7 +58,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       headers: {
-        "Content-Security-Policy": contentSecurityPolicy,
+        "Content-Security-Policy": DEVELOPMENT_CSP,
       },
     },
     build: {
